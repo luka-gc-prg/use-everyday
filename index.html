@@ -12,7 +12,14 @@
     font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     background:#0a0a0a;color:#ece9e2;position:relative;
   }
-  body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(200,169,110,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+  body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(200,169,110,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 900px 600px at 12% -8%, rgba(200,169,110,.16), transparent 60%),
+      radial-gradient(ellipse 800px 700px at 100% 18%, rgba(200,169,110,.08), transparent 65%),
+      radial-gradient(ellipse 700px 600px at 50% 100%, rgba(200,169,110,.06), transparent 60%);
+  }
 
   /* ===== LOCKSCREEN ===== */
   #lockscreen{
@@ -25,62 +32,55 @@
   #lockscreen.dragging{transition:none}
   #lockscreen.unlocked{transform:translateY(-100%);opacity:0;pointer-events:none}
 
-  .lock-top{display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:4vh}
-  .lock-logo{display:flex;align-items:center;justify-content:center}
-  .lock-clock{width:64px;height:64px;border-radius:50%;border:2px solid #c8a96e;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
-  .lock-clock::before{content:"";position:absolute;width:2px;height:18px;background:#c8a96e;top:10px;left:50%;transform:translateX(-50%);transform-origin:bottom center;border-radius:2px;animation:lockHourHand 8s linear infinite}
-  .lock-clock::after{content:"";position:absolute;width:2px;height:14px;background:#c8a96e;top:50%;left:50%;transform-origin:bottom center;transform:translateX(-50%) translateY(-100%) rotate(55deg);border-radius:2px;animation:lockMinHand 4s linear infinite}
-  @keyframes lockHourHand{0%{transform:translateX(-50%) rotate(0deg)}100%{transform:translateX(-50%) rotate(360deg)}}
-  @keyframes lockMinHand{0%{transform:translateX(-50%) translateY(-100%) rotate(55deg)}100%{transform:translateX(-50%) translateY(-100%) rotate(415deg)}}
-  .lock-brand{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:.07em;color:#f5f2ed}
-  .lock-date{font-size:12.5px;letter-spacing:.1em;color:#8a8078;text-transform:uppercase;margin-top:-4px}
+  .lock-top{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:6vh}
+  .lock-date{font-size:12.5px;letter-spacing:.14em;color:#8a8078;text-transform:uppercase}
 
-  .lock-middle{flex:1;display:flex;align-items:center;justify-content:center}
-  .lock-status{font-size:12px;letter-spacing:.08em;color:#7c7a73;text-align:center;min-height:18px;transition:opacity .2s}
+  .lock-middle{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px}
 
-  .lock-swipe-zone{
-    display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:300px;
-  }
-  .lock-swipe-hint{
-    font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8a744a;
-    display:flex;align-items:center;gap:8px;opacity:.85;
-  }
-  .lock-chevrons{display:flex;flex-direction:column;gap:1px;line-height:1}
-  .lock-chevrons span{font-size:13px;color:#c8a96e;animation:chevronPulse 1.6s ease-in-out infinite}
-  .lock-chevrons span:nth-child(2){animation-delay:.15s;opacity:.6}
-  .lock-chevrons span:nth-child(3){animation-delay:.3s;opacity:.3}
-  @keyframes chevronPulse{0%,100%{transform:translateY(0);opacity:.3}50%{transform:translateY(-4px);opacity:1}}
-
-  .lock-track{
-    position:relative;width:100%;height:64px;border-radius:32px;
-    background:rgba(200,169,110,.08);border:1px solid rgba(200,169,110,.25);
-    display:flex;align-items:center;padding:6px;overflow:hidden;
-  }
-  .lock-track-fill{
-    position:absolute;inset:6px;border-radius:26px;
-    background:linear-gradient(180deg,rgba(200,169,110,.35),rgba(200,169,110,.15));
-    width:0;transition:width .05s linear;
-  }
-  .lock-track-label{
-    position:absolute;left:0;right:0;text-align:center;
-    font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#c8a96e;
-    pointer-events:none;opacity:.75;
-  }
-  .lock-handle{
-    position:relative;z-index:2;width:52px;height:52px;border-radius:50%;
-    background:#c8a96e;display:flex;align-items:center;justify-content:center;
-    cursor:grab;touch-action:none;flex-shrink:0;
-    box-shadow:0 4px 14px rgba(0,0,0,.35);
+  .lock-logo-wrap{
+    cursor:grab;touch-action:none;
+    display:flex;flex-direction:column;align-items:center;gap:18px;
     transition:transform .05s linear;
   }
-  .lock-handle:active{cursor:grabbing}
-  .lock-handle svg{width:20px;height:20px}
+  .lock-logo-wrap:active{cursor:grabbing}
+  .lock-logo-badge{
+    position:relative;
+    padding:18px 38px 18px 22px;
+    border-radius:50px;
+    background:linear-gradient(180deg,#141210,#0a0908);
+    border:1.5px solid #c8a96e;
+    box-shadow:0 8px 28px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+    display:flex;align-items:center;gap:16px;
+  }
+  .lock-logo-clock{
+    width:46px;height:46px;border-radius:50%;border:2px solid #c8a96e;
+    display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;
+  }
+  .lock-logo-clock::before{content:"";position:absolute;width:2px;height:13px;background:#c8a96e;top:7px;left:50%;transform:translateX(-50%);transform-origin:bottom center;border-radius:2px;animation:lockHourHand 8s linear infinite}
+  .lock-logo-clock::after{content:"";position:absolute;width:2px;height:10px;background:#c8a96e;top:50%;left:50%;transform-origin:bottom center;transform:translateX(-50%) translateY(-100%) rotate(55deg);border-radius:2px;animation:lockMinHand 4s linear infinite}
+  @keyframes lockHourHand{0%{transform:translateX(-50%) rotate(0deg)}100%{transform:translateX(-50%) rotate(360deg)}}
+  @keyframes lockMinHand{0%{transform:translateX(-50%) translateY(-100%) rotate(55deg)}100%{transform:translateX(-50%) translateY(-100%) rotate(415deg)}}
+  .lock-logo-text{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:.08em;color:#f5f2ed;line-height:1}
+
+  .lock-swipe-hint{
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8a744a;
+    display:flex;flex-direction:column;align-items:center;gap:10px;opacity:.85;
+  }
+  .lock-chevrons{display:flex;flex-direction:column;gap:1px;line-height:1}
+  .lock-chevrons span{font-size:15px;color:#c8a96e;animation:chevronPulse 1.6s ease-in-out infinite;display:block}
+  .lock-chevrons span:nth-child(2){animation-delay:.15s;opacity:.6}
+  .lock-chevrons span:nth-child(3){animation-delay:.3s;opacity:.3}
+  @keyframes chevronPulse{0%,100%{transform:translateY(0);opacity:.3}50%{transform:translateY(-5px);opacity:1}}
+
+  .lock-status{font-size:12px;letter-spacing:.08em;color:#7c7a73;text-align:center;min-height:18px;transition:opacity .2s}
+  .lock-bottom{min-height:18px}
 
   /* ===== LOGIN ===== */
   #loginScreen{
     position:fixed;inset:0;z-index:900;
     display:flex;align-items:center;justify-content:center;padding:24px;
     opacity:0;pointer-events:none;transition:opacity .35s ease;
+
   }
   #loginScreen.show{opacity:1;pointer-events:auto}
   .login-box{width:100%;max-width:340px;text-align:center}
@@ -115,26 +115,22 @@
 
 <div id="lockscreen">
   <div class="lock-top">
-    <div class="lock-clock"></div>
-    <div class="lock-brand">EVERYDAY</div>
     <div class="lock-date" id="lockDate">—</div>
   </div>
   <div class="lock-middle">
-    <div class="lock-status" id="lockStatus"></div>
-  </div>
-  <div class="lock-swipe-zone">
-    <div class="lock-swipe-hint">
-      <div class="lock-chevrons"><span>︿</span><span>︿</span><span>︿</span></div>
-      <span>Nach oben wischen zum Entsperren</span>
-    </div>
-    <div class="lock-track" id="lockTrack">
-      <div class="lock-track-fill" id="lockTrackFill"></div>
-      <div class="lock-track-label" id="lockTrackLabel">Entsperren</div>
-      <div class="lock-handle" id="lockHandle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1a1408" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+    <div class="lock-logo-wrap" id="lockHandle">
+      <div class="lock-logo-badge">
+        <div class="lock-logo-clock"></div>
+        <span class="lock-logo-text">EVERYDAY</span>
+      </div>
+      <div class="lock-swipe-hint">
+        <div class="lock-chevrons"><span>︿</span><span>︿</span><span>︿</span></div>
+        <span id="lockTrackLabel">Nach oben wischen zum Entsperren</span>
       </div>
     </div>
+    <div class="lock-status" id="lockStatus"></div>
   </div>
+  <div class="lock-bottom"></div>
 </div>
 
 <div id="loginScreen">
@@ -224,7 +220,7 @@ function showLock() {
   document.getElementById("loginScreen").classList.remove("show");
   const lock = document.getElementById("lockscreen");
   lock.classList.remove("unlocked");
-  resetTrack();
+  resetLogo();
 }
 
 document.getElementById("go").addEventListener("click", () => {
@@ -246,73 +242,54 @@ function setLockDate() {
 }
 setLockDate();
 
-const track = document.getElementById("lockTrack");
 const handle = document.getElementById("lockHandle");
-const trackFill = document.getElementById("lockTrackFill");
 const trackLabel = document.getElementById("lockTrackLabel");
 const lockscreenEl = document.getElementById("lockscreen");
-let dragging = false, startY = 0, currentY = 0, trackHeight = 0, maxDrag = 0;
+let dragging = false, startY = 0;
 
-function getMaxDrag() {
-  return track.clientWidth - handle.clientWidth - 12;
+function resetLogo() {
+  handle.style.transform = "";
+  trackLabel.style.opacity = "1";
+  lockscreenEl.style.transform = "";
+  lockscreenEl.style.opacity = "";
 }
 
-function resetTrack() {
-  handle.style.transform = "translateX(0)";
-  trackFill.style.width = "0px";
-  trackLabel.style.opacity = "0.75";
-}
-
-function onDragStart(clientY, clientX) {
+function onDragStart(clientY) {
   dragging = true;
   startY = clientY;
-  startXClient = clientX;
-  maxDrag = getMaxDrag();
   lockscreenEl.classList.add("dragging");
 }
-let startXClient = 0;
-function onDragMove(clientY, clientX) {
+function onDragMove(clientY) {
   if (!dragging) return;
-  const dy = startY - clientY;
-  const dx = clientX - startXClient;
-  const progress = Math.max(0, Math.min(1, dy / 140));
-  const handleX = Math.max(0, Math.min(maxDrag, dx));
-  handle.style.transform = "translateX(" + handleX + "px)";
-  trackFill.style.width = (handleX + handle.clientWidth) + "px";
-  trackLabel.style.opacity = String(0.75 - progress * 0.6);
-
-  const totalDrag = Math.max(progress, handleX / maxDrag);
-  if (dy > 100 || handleX > maxDrag * 0.85) {
-    completeUnlock();
-  } else {
-    lockscreenEl.style.transform = "translateY(" + (-dy * 0.6) + "px)";
-    lockscreenEl.style.opacity = String(1 - progress * 0.5);
-  }
+  const dy = Math.max(0, startY - clientY);
+  const progress = Math.max(0, Math.min(1, dy / 130));
+  handle.style.transform = "translateY(" + (-dy * 0.7) + "px) scale(" + (1 + progress * 0.04) + ")";
+  trackLabel.style.opacity = String(1 - progress * 0.8);
+  lockscreenEl.style.transform = "translateY(" + (-dy * 0.45) + "px)";
+  lockscreenEl.style.opacity = String(1 - progress * 0.4);
+  if (dy > 110) completeUnlock();
 }
 function onDragEnd() {
   if (!dragging) return;
   dragging = false;
   lockscreenEl.classList.remove("dragging");
-  if (!lockscreenEl.classList.contains("unlocked")) {
-    lockscreenEl.style.transform = "";
-    lockscreenEl.style.opacity = "";
-    resetTrack();
-  }
+  if (!lockscreenEl.classList.contains("unlocked")) resetLogo();
 }
 function completeUnlock() {
   if (lockscreenEl.classList.contains("unlocked")) return;
   dragging = false;
+  lockscreenEl.classList.remove("dragging");
   lockscreenEl.style.transform = "";
   lockscreenEl.style.opacity = "";
   showLogin();
 }
 
-handle.addEventListener("mousedown", e => { onDragStart(e.clientY, e.clientX); e.preventDefault(); });
-window.addEventListener("mousemove", e => onDragMove(e.clientY, e.clientX));
+handle.addEventListener("mousedown", e => { onDragStart(e.clientY); e.preventDefault(); });
+window.addEventListener("mousemove", e => onDragMove(e.clientY));
 window.addEventListener("mouseup", onDragEnd);
 
-handle.addEventListener("touchstart", e => { const t = e.touches[0]; onDragStart(t.clientY, t.clientX); }, {passive:true});
-window.addEventListener("touchmove", e => { const t = e.touches[0]; onDragMove(t.clientY, t.clientX); }, {passive:true});
+handle.addEventListener("touchstart", e => { onDragStart(e.touches[0].clientY); }, {passive:true});
+window.addEventListener("touchmove", e => { if (dragging) onDragMove(e.touches[0].clientY); }, {passive:true});
 window.addEventListener("touchend", onDragEnd);
 
 let lockSwipeStartY = null;
