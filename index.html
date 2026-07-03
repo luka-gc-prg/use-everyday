@@ -49,16 +49,16 @@
     </div>
     <p class="auth-sub">Dein persönlicher Bereich</p>
     <div class="auth-tabs">
-      <button class="auth-tab active" data-tab="login">Anmelden</button>
-      <button class="auth-tab" data-tab="register">Konto erstellen</button>
+      <button class="auth-tab active" onclick="document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');document.getElementById('authLogin').style.display='block';document.getElementById('authRegister').style.display='none'">Anmelden</button>
+      <button class="auth-tab" onclick="document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');document.getElementById('authRegister').style.display='block';document.getElementById('authLogin').style.display='none'">Konto erstellen</button>
     </div>
-    <div class="auth-form active" id="authLogin">
+    <div id="authLogin">
       <input type="email" id="loginUser" placeholder="E-Mail-Adresse" autocomplete="email" autofocus>
       <input type="password" id="loginPw" placeholder="Passwort" autocomplete="current-password">
       <button class="auth-btn" id="loginBtn">Anmelden</button>
       <div class="auth-err" id="loginErr"></div>
     </div>
-    <div class="auth-form" id="authRegister">
+    <div id="authRegister" style="display:none">
       <input type="email" id="regUser" placeholder="E-Mail-Adresse" autocomplete="email">
       <input type="text" id="regName" placeholder="Anzeigename (optional)">
       <input type="password" id="regPw" placeholder="Passwort (min. 6 Zeichen)" autocomplete="new-password">
@@ -69,6 +69,59 @@
     <div class="auth-hint">Deine Daten werden verschlüsselt in der Cloud gespeichert.<br>Jeder Benutzer hat seinen eigenen Bereich.</div>
   </div>
 </div>
+<script>
+(function(){
+  const API="https://use-everyday.luka-gc.workers.dev";
+  function authDone(token,user){
+    try{localStorage.setItem("lg_auth_token",token);localStorage.setItem("lg_user",JSON.stringify(user));}catch(e){}
+    var o=document.getElementById("authOverlay");
+    o.style.opacity="0";o.style.transform="translateY(-30px)";
+    setTimeout(function(){o.style.display="none";},400);
+  }
+  // check existing session
+  try{
+    var t=localStorage.getItem("lg_auth_token"),u=localStorage.getItem("lg_user");
+    if(t&&u){authDone(t,JSON.parse(u));return;}
+  }catch(e){}
+  // login
+  document.getElementById("loginBtn").addEventListener("click",async function(){
+    var user=document.getElementById("loginUser").value.trim();
+    var pw=document.getElementById("loginPw").value;
+    var err=document.getElementById("loginErr");
+    var btn=this;
+    if(!user||!pw){err.textContent="E-Mail und Passwort eingeben";return;}
+    btn.disabled=true;btn.textContent="Wird angemeldet …";err.textContent="";
+    try{
+      var r=await fetch(API+"/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:user,password:pw})});
+      var d=await r.json();
+      if(!r.ok){err.textContent=d.error||"Anmeldung fehlgeschlagen";btn.disabled=false;btn.textContent="Anmelden";return;}
+      authDone(d.token,{username:d.username,displayName:d.displayName});
+      location.reload();
+    }catch(e){err.textContent="API nicht erreichbar";btn.disabled=false;btn.textContent="Anmelden";}
+  });
+  document.getElementById("loginPw").addEventListener("keydown",function(e){if(e.key==="Enter")document.getElementById("loginBtn").click();});
+  // register
+  document.getElementById("regBtn").addEventListener("click",async function(){
+    var user=document.getElementById("regUser").value.trim();
+    var name=document.getElementById("regName").value.trim();
+    var pw=document.getElementById("regPw").value;
+    var pw2=document.getElementById("regPw2").value;
+    var err=document.getElementById("regErr");
+    var btn=this;
+    if(!user||!pw){err.textContent="E-Mail und Passwort eingeben";return;}
+    if(pw!==pw2){err.textContent="Passwörter stimmen nicht überein";return;}
+    btn.disabled=true;btn.textContent="Wird erstellt …";err.textContent="";
+    try{
+      var r=await fetch(API+"/api/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:user,password:pw,displayName:name||user})});
+      var d=await r.json();
+      if(!r.ok){err.textContent=d.error||"Registrierung fehlgeschlagen";btn.disabled=false;btn.textContent="Konto erstellen";return;}
+      authDone(d.token,{username:d.username,displayName:d.displayName});
+      location.reload();
+    }catch(e){err.textContent="API nicht erreichbar";btn.disabled=false;btn.textContent="Konto erstellen";}
+  });
+  document.getElementById("regPw2").addEventListener("keydown",function(e){if(e.key==="Enter")document.getElementById("regBtn").click();});
+})();
+</script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Arbeitszeit">
