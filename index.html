@@ -701,6 +701,15 @@
   .settingsBody{padding:8px 18px 18px;max-height:75vh;overflow-y:auto}
   .setSection{padding:16px 0;border-top:1px solid var(--line)}
   .setSection:first-child{border-top:none}
+  .dev-only{display:none}
+  body.is-dev .dev-only{display:block}
+  .admin-user{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+  .admin-user-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+  .admin-user-name{font-family:"Bebas Neue",sans-serif;font-size:17px;letter-spacing:.02em;color:var(--gold)}
+  .admin-user-date{font-family:"DM Mono",monospace;font-size:10px;color:var(--muted)}
+  .admin-user-stats{display:flex;flex-wrap:wrap;gap:6px 12px;font-family:"DM Mono",monospace;font-size:11px;color:var(--muted-2)}
+  .admin-user-stats b{color:var(--text);font-weight:600}
+  .admin-empty{font-size:12px;color:var(--muted);padding:8px 2px}
   .setSecTitle{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:10px}
   .setRow{display:flex;align-items:center;gap:14px;padding:8px 0}
   .setTxt{flex:1;display:flex;flex-direction:column;gap:2px}
@@ -1556,7 +1565,7 @@
         </div>
       </div>
 
-      <div class="setSection">
+      <div class="setSection dev-only">
         <div class="setSecTitle">Speichern & Laden (zusätzliches Backup)</div>
         <div class="setRow">
           <div class="setTxt"><b>Daten sichern</b><span>Alle Einträge als Datei herunterladen</span></div>
@@ -1590,12 +1599,21 @@
         </div>
       </div>
 
-      <div class="setSection">
+      <div class="setSection dev-only">
         <div class="setSecTitle">Daten bereinigen</div>
         <div class="setRow">
           <div class="setTxt"><b>Alte manuelle Stunden</b><span>Frühere Einträge ohne Kalender entfernen</span></div>
           <button class="setBtn" id="btnClearManual">🧹 Entfernen</button>
         </div>
+      </div>
+
+      <div class="setSection dev-only" id="adminSection">
+        <div class="setSecTitle">🛠 Developer · Alle Konten</div>
+        <div class="setRow">
+          <div class="setTxt"><b>Konten-Übersicht</b><span>Alle registrierten Benutzer und ihre Daten anzeigen</span></div>
+          <button class="setBtn" id="adminLoadUsers">👥 Konten laden</button>
+        </div>
+        <div id="adminUserList" style="margin-top:10px"></div>
       </div>
 
     </div>
@@ -3806,6 +3824,10 @@ let currentUser = null;
 let cloudSyncOK = false;
 let cloudSyncTimer = null;
 let lastCloudPushAt = null;
+const DEV_ACCOUNT = "luka.gc@icloud.com";
+function isDev(){
+  try{var u=JSON.parse(localStorage.getItem("lg_user"));return u&&u.username===DEV_ACCOUNT;}catch(e){return false;}
+}
 
 function getCloudToken(){
   if(cloudToken) return cloudToken;
@@ -3978,6 +4000,37 @@ $("setCloudPush").addEventListener("click",async()=>{
     localStorage.removeItem("lg_user");
     location.reload();
   });
+
+  // Developer mode: unlock dev-only sections
+  if(isDev()){
+    document.body.classList.add("is-dev");
+    var alu=$("adminLoadUsers");
+    if(alu)alu.addEventListener("click",async function(){
+      var box=$("adminUserList");
+      var btn=this;
+      btn.disabled=true;btn.textContent="Wird geladen …";
+      box.innerHTML='<div class="admin-empty">Lade Konten …</div>';
+      try{
+        var token=getCloudToken();
+        var r=await fetch(CLOUD_API_BASE+"/api/admin/users",{headers:{"Authorization":"Bearer "+token}});
+        var d=await r.json();
+        if(!r.ok){box.innerHTML='<div class="admin-empty">Fehler: '+(d.error||"unbekannt")+'</div>';btn.disabled=false;btn.textContent="👥 Konten laden";return;}
+        if(!d.users||!d.users.length){box.innerHTML='<div class="admin-empty">Keine Konten gefunden.</div>';btn.disabled=false;btn.textContent="👥 Konten laden";return;}
+        var html="";
+        d.users.forEach(function(u){
+          var created=u.created?new Date(u.created).toLocaleDateString("de-CH"):"—";
+          var e=u.entries||{};
+          var kb=u.dataSize?Math.round(u.dataSize/1024)+" KB":"0 KB";
+          html+='<div class="admin-user"><div class="admin-user-head"><span class="admin-user-name">'+escapeHtml(u.displayName||u.username)+'</span><span class="admin-user-date">'+created+'</span></div>'
+            +'<div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:DM Mono,monospace">'+escapeHtml(u.username)+'</div>'
+            +'<div class="admin-user-stats"><span><b>'+(e.appointments||0)+'</b> Termine</span><span><b>'+(e.expenses||0)+'</b> Rechnungen</span><span><b>'+(e.dailyExp||0)+'</b> Ausgaben</span><span><b>'+(e.todos||0)+'</b> Aufgaben</span><span><b>'+(e.notes||0)+'</b> Notizen</span><span>'+kb+'</span></div></div>';
+        });
+        html='<div class="admin-empty">'+d.count+' Konten registriert:</div>'+html;
+        box.innerHTML=html;
+        btn.disabled=false;btn.textContent="🔄 Aktualisieren";
+      }catch(e){box.innerHTML='<div class="admin-empty">Verbindungsfehler: '+e.message+'</div>';btn.disabled=false;btn.textContent="👥 Konten laden";}
+    });
+  }
 })();
 
 /* ---------- Pflicht-Backup-Erinnerung (alle 2 Stunden) ---------- */
@@ -4002,6 +4055,7 @@ function showBackupModal(hoursAgo){
   modal.classList.add("show");
 }
 function checkBackupReminder(){
+  if(!isDev())return; // Backup-Erinnerung nur für Developer
   const hasData=expenses.length||extra.length||notes.length||todos.length||docs.length||appointments.length;
   if(!hasData)return;
   let last=null;
