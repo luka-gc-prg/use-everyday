@@ -3916,26 +3916,7 @@ async function seedFromBrowserStore(){
 }
 
 /* ---------- init ---------- */
-(function setup(){
-  // UI setup that doesn't need user data
-  $("deDate").value=ymd(new Date());
-  $("eDate").value=ymd(new Date());
-  $("xDate").value=ymd(new Date());
-  $("rStart").value=ym(new Date());
-  $("aDate").value=ymd(new Date());
-  $("nDate").value=ymd(new Date());
-  $("tDue").value=ymd(new Date());
-  $("aCat").innerHTML=Object.entries(CATS).map(([k,c])=>`<option value="${k}">${c.label}</option>`).join("");
-  $("aCat").value="termin";
-  setStatus("open");
-  setApptMode(false);
-  setWageType("hourly");
-  setREndMode("never");
-  updateRepeatFields();
-  updateTodoRepeatFields();
-  if(fsSupported()){$("fsRow").style.display="";$("fsNote").style.display="none";}
-  else{$("fsRow").style.display="none";$("fsNote").style.display="";}
-})();
+// setup moved into startApp
 
 /* ---------- AUTH SYSTEM ---------- */
 function initAuth(){
@@ -4015,6 +3996,24 @@ function initAuth(){
 }
 
 async function startApp(){
+  // UI setup
+  $("deDate").value=ymd(new Date());
+  $("eDate").value=ymd(new Date());
+  $("xDate").value=ymd(new Date());
+  $("rStart").value=ym(new Date());
+  $("aDate").value=ymd(new Date());
+  $("nDate").value=ymd(new Date());
+  $("tDue").value=ymd(new Date());
+  $("aCat").innerHTML=Object.entries(CATS).map(([k,c])=>`<option value="${k}">${c.label}</option>`).join("");
+  $("aCat").value="termin";
+  setStatus("open");
+  setApptMode(false);
+  setWageType("hourly");
+  setREndMode("never");
+  updateRepeatFields();
+  updateTodoRepeatFields();
+  if(fsSupported()){$("fsRow").style.display="";$("fsNote").style.display="none";}
+  else{$("fsRow").style.display="none";$("fsNote").style.display="";}
   // Show user bar
   if(currentUser){
     const bar = document.createElement("div");
