@@ -4297,32 +4297,21 @@ async function publishUpdate(title,changesArr){
 }
 
 function setupChangelog(){
-  // Version display in settings
-  var vt=$("setVersionTxt");if(vt)vt.textContent=APP_VERSION;
-  // Close button
-  var cb=$("clClose");
-  if(cb)cb.addEventListener("click",function(){
-    var m=$("changelogModal");if(m)m.classList.remove("show");
-    try{window.authStore.set("seenVersion",APP_VERSION);}catch(e){}
-  });
-  // "Was ist neu" button in settings
-  var wb=$("setChangelog");
-  if(wb)wb.addEventListener("click",showChangelog);
+  // Ensure developer sections are visible (runs in init when user is loaded)
+  if(isDev()){document.body.classList.add("is-dev");}
 
-  // Developer: open editor
+  // Developer editor buttons FIRST (most important, wire immediately)
   var oe=$("openClEditor");
-  if(oe)oe.addEventListener("click",function(){
-    $("clEditTitle").value="";
-    $("clEditChanges").value="";
-    $("clEditErr").textContent="";
-    $("clEditModal").classList.add("show");
-  });
-  // Developer: cancel editor
+  if(oe)oe.onclick=function(){
+    var t=$("clEditTitle");if(t)t.value="";
+    var c=$("clEditChanges");if(c)c.value="";
+    var e=$("clEditErr");if(e)e.textContent="";
+    var m=$("clEditModal");if(m)m.classList.add("show");
+  };
   var ec=$("clEditCancel");
-  if(ec)ec.addEventListener("click",function(){$("clEditModal").classList.remove("show");});
-  // Developer: publish
+  if(ec)ec.onclick=function(){var m=$("clEditModal");if(m)m.classList.remove("show");};
   var ep=$("clEditPublish");
-  if(ep)ep.addEventListener("click",async function(){
+  if(ep)ep.onclick=async function(){
     var title=$("clEditTitle").value.trim();
     var raw=$("clEditChanges").value.trim();
     var err=$("clEditErr");
@@ -4338,7 +4327,19 @@ function setupChangelog(){
       hint("✓ Update veröffentlicht – alle Benutzer sehen es beim nächsten Öffnen",4000);
     }catch(e){err.textContent=e.message;}
     btn.disabled=false;btn.textContent="📢 Update veröffentlichen";
+  };
+
+  // Version display in settings
+  var vt=$("setVersionTxt");if(vt)vt.textContent=APP_VERSION;
+  // Close button
+  var cb=$("clClose");
+  if(cb)cb.addEventListener("click",function(){
+    var m=$("changelogModal");if(m)m.classList.remove("show");
+    try{window.authStore.set("seenVersion",APP_VERSION);}catch(e){}
   });
+  // "Was ist neu" button in settings
+  var wb=$("setChangelog");
+  if(wb)wb.addEventListener("click",showChangelog);
 
   // Auto-show changelog if new version (after cloud load)
   loadChangelogFromCloud().then(function(){
