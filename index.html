@@ -3652,7 +3652,7 @@ function loadLocal(){
 }
 
 /* ---- 1b) Cloud-Sync (Cloudflare Worker + KV) — gleiche Daten auf allen Geräten ---- */
-const CLOUD_API_BASE = localStorage.getItem("lg_api_base") || ""; // Worker-URL, z.B. https://everyday-api.dein-name.workers.dev
+const CLOUD_API_BASE = localStorage.getItem("lg_api_base") || "https://use-everyday.luka-gc.workers.dev"; // Worker-URL, z.B. https://everyday-api.dein-name.workers.dev
 let cloudToken = null;
 let currentUser = null;
 
