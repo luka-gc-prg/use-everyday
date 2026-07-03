@@ -53,7 +53,7 @@
 <script>
 (function(){
   // Skip lockscreen if already logged in
-  if(localStorage.getItem("lg_auth_token")){
+  if(window.authStore && window.authStore.get("lg_auth_token")){
     var lsEl=document.getElementById("lockscreen");
     if(lsEl)lsEl.parentNode.removeChild(lsEl);
     return;
@@ -141,10 +141,34 @@
   </div>
 </div>
 <script>
+// --- Auth Storage: mobile keeps login (localStorage), desktop logs out on close (sessionStorage) ---
+window.isMobileDevice=function(){
+  return /Android|iPhone|iPad|iPod|Mobile|Silk|Kindle|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent)
+    || (navigator.maxTouchPoints>1 && /Macintosh/i.test(navigator.userAgent)); // iPad iOS 13+
+};
+window.authStore={
+  get:function(k){
+    try{
+      var m=localStorage.getItem(k);
+      if(m!==null)return m;
+      return sessionStorage.getItem(k);
+    }catch(e){return null;}
+  },
+  set:function(k,v){
+    try{
+      if(window.isMobileDevice()){localStorage.setItem(k,v);sessionStorage.removeItem(k);}
+      else{sessionStorage.setItem(k,v);localStorage.removeItem(k);}
+    }catch(e){}
+  },
+  remove:function(k){
+    try{localStorage.removeItem(k);sessionStorage.removeItem(k);}catch(e){}
+  }
+};
 (function(){
   const API="https://use-everyday.luka-gc.workers.dev";
   function authDone(token,user){
-    try{localStorage.setItem("lg_auth_token",token);localStorage.setItem("lg_user",JSON.stringify(user));}catch(e){}
+    window.authStore.set("lg_auth_token",token);
+    window.authStore.set("lg_user",JSON.stringify(user));
     var o=document.getElementById("authOverlay");
     if(o)o.parentNode.removeChild(o);
     var ls=document.getElementById("lockscreen");
@@ -152,7 +176,7 @@
   }
   // check existing session
   try{
-    var t=localStorage.getItem("lg_auth_token"),u=localStorage.getItem("lg_user");
+    var t=window.authStore.get("lg_auth_token"),u=window.authStore.get("lg_user");
     if(t&&u){authDone(t,JSON.parse(u));return;}
   }catch(e){}
   // login
@@ -701,6 +725,24 @@
   .settingsBody{padding:8px 18px 18px;max-height:75vh;overflow-y:auto}
   .setSection{padding:16px 0;border-top:1px solid var(--line)}
   .setSection:first-child{border-top:none}
+  .changelogModal{display:none;position:fixed;inset:0;z-index:940;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px}
+  .changelogModal.show{display:flex}
+  .changelogBox{width:100%;max-width:400px;max-height:82vh;overflow-y:auto;background:var(--panel);border:1px solid var(--gold-dim);border-radius:22px;padding:30px 26px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+  .cl-head{text-align:center;margin-bottom:22px}
+  .cl-badge{font-size:34px;margin-bottom:10px}
+  .cl-version{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:6px}
+  .cl-title{font-family:"Bebas Neue",sans-serif;font-size:28px;letter-spacing:.03em;color:var(--text)}
+  .cl-body{margin-bottom:24px}
+  .cl-entry{margin-bottom:20px}
+  .cl-entry:last-child{margin-bottom:0}
+  .cl-entry-head{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .cl-entry-ver{font-family:"Bebas Neue",sans-serif;font-size:19px;letter-spacing:.03em;color:var(--gold)}
+  .cl-entry-date{font-family:"DM Mono",monospace;font-size:10px;color:var(--muted)}
+  .cl-entry-title{font-size:13px;color:var(--text);font-weight:600;margin-bottom:8px}
+  .cl-change{display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.5;color:var(--muted);padding:4px 0}
+  .cl-change::before{content:"›";color:var(--gold);flex:none;font-weight:700}
+  .cl-btn{width:100%;background:var(--gold);border:none;color:#1a1408;font-family:"DM Sans",sans-serif;font-size:14px;font-weight:600;padding:14px;border-radius:12px;cursor:pointer;transition:.15s}
+  .cl-btn:hover{filter:brightness(1.1)}
   .dev-only{display:none}
   body.is-dev .dev-only{display:block}
   .admin-user{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px}
@@ -1030,6 +1072,18 @@
       <div class="bm-text" id="backupModalText">Sichere deine Daten regelmässig, damit nichts verloren geht.</div>
       <button class="bm-save" id="bmSaveNow">💾 Backup erstellen</button>
       <button class="bm-confirm" id="bmConfirm">Bereits gesichert — Erinnerung schliessen</button>
+    </div>
+  </div>
+
+  <div class="changelogModal" id="changelogModal">
+    <div class="changelogBox">
+      <div class="cl-head">
+        <div class="cl-badge">✨</div>
+        <div class="cl-version" id="clVersion">Version 2.0.0</div>
+        <div class="cl-title" id="clTitle">Was ist neu</div>
+      </div>
+      <div class="cl-body" id="clBody"></div>
+      <button class="cl-btn" id="clClose">Verstanden</button>
     </div>
   </div>
 
@@ -1596,6 +1650,14 @@
         <div class="setRow">
           <div class="setTxt"><b>Design</b><span>Hell, Dunkel oder automatisch nach Gerät</span></div>
           <button class="setBtn" id="setTheme">🌗 Gerät</button>
+        </div>
+      </div>
+
+      <div class="setSection">
+        <div class="setSecTitle">Über EVERYDAY</div>
+        <div class="setRow">
+          <div class="setTxt"><b>Version</b><span id="setVersionTxt">—</span></div>
+          <button class="setBtn" id="setChangelog">✨ Was ist neu</button>
         </div>
       </div>
 
@@ -3825,31 +3887,49 @@ let cloudSyncOK = false;
 let cloudSyncTimer = null;
 let lastCloudPushAt = null;
 const DEV_ACCOUNT = "luka.gc@icloud.com";
+const APP_VERSION = "2.0.0";
+const CHANGELOG = [
+  {
+    version: "2.0.0",
+    date: "2026-07-03",
+    title: "Grosses Update: Konten & Cloud",
+    changes: [
+      "Neu: Persönliche Benutzerkonten – jeder hat seinen eigenen Bereich",
+      "Neu: Automatische Cloud-Synchronisation über alle Geräte",
+      "Neu: Tageskalender-Ansicht auf der Startseite mit Zeitraster",
+      "Neu: Aufgaben-Übersicht direkt auf der Startseite zum Abhaken",
+      "Neu: Wetter-Vorhersage für 7 Tage",
+      "Neu: 20%-Sparbetrag nach Lohnauszahltagen aufgeschlüsselt",
+      "Verbessert: Am Handy bleibst du eingeloggt, am Computer wird beim Schliessen abgemeldet",
+      "Verbessert: Tägliche Ausgaben – Bearbeiten und Löschen funktioniert wieder",
+      "Verbessert: Rechnungen zählen erst zum Saldo, wenn sie bezahlt sind",
+    ]
+  }
+];
 function isDev(){
-  try{var u=JSON.parse(localStorage.getItem("lg_user"));return u&&u.username===DEV_ACCOUNT;}catch(e){return false;}
+  try{var u=JSON.parse(window.authStore.get("lg_user"));return u&&u.username===DEV_ACCOUNT;}catch(e){return false;}
 }
 
 function getCloudToken(){
   if(cloudToken) return cloudToken;
-  try{ cloudToken = localStorage.getItem("lg_auth_token"); }catch(e){}
+  try{ cloudToken = window.authStore.get("lg_auth_token"); }catch(e){}
   return cloudToken;
 }
 
 function setCloudToken(token, user){
   cloudToken = token;
   currentUser = user;
-  try{
-    if(token) localStorage.setItem("lg_auth_token", token);
-    else localStorage.removeItem("lg_auth_token");
-    if(user) localStorage.setItem("lg_user", JSON.stringify(user));
-    else localStorage.removeItem("lg_user");
-  }catch(e){}
+  if(token) window.authStore.set("lg_auth_token", token);
+  else window.authStore.remove("lg_auth_token");
+  if(user) window.authStore.set("lg_user", JSON.stringify(user));
+  else window.authStore.remove("lg_user");
 }
 
 function logout(){
   setCloudToken(null, null);
   cloudSyncOK = false;
-  try{localStorage.removeItem("lg_auth_token");localStorage.removeItem("lg_user");}catch(e){}
+  window.authStore.remove("lg_auth_token");
+  window.authStore.remove("lg_user");
   location.reload();
 }
 
@@ -3988,7 +4068,7 @@ $("setCloudPush").addEventListener("click",async()=>{
 // Account name + logout in settings
 (function(){
   try{
-    var u=localStorage.getItem("lg_user");
+    var u=window.authStore.get("lg_user");
     if(u){var user=JSON.parse(u);var el=$("setAccountName");if(el)el.textContent=user.displayName||user.username;}
   }catch(e){}
   var lb=$("setLogout");
@@ -3996,8 +4076,8 @@ $("setCloudPush").addEventListener("click",async()=>{
     if(!confirm("Möchtest du dich wirklich abmelden? Deine Daten sind in der Cloud gespeichert und beim nächsten Login wieder da."))return;
     // push data one last time before logout
     try{await cloudPush();}catch(e){}
-    localStorage.removeItem("lg_auth_token");
-    localStorage.removeItem("lg_user");
+    window.authStore.remove("lg_auth_token");
+    window.authStore.remove("lg_user");
     location.reload();
   });
 
@@ -4140,6 +4220,44 @@ async function seedFromBrowserStore(){
 // setup moved into startApp
 
 /* ---------- AUTH SYSTEM ---------- */
+// ---- CHANGELOG / UPDATE ----
+function renderChangelogBody(){
+  var body=$("clBody");if(!body)return;
+  var html="";
+  CHANGELOG.forEach(function(entry){
+    var d=entry.date?new Date(entry.date).toLocaleDateString("de-CH",{day:"2-digit",month:"long",year:"numeric"}):"";
+    html+='<div class="cl-entry"><div class="cl-entry-head"><span class="cl-entry-ver">Version '+entry.version+'</span><span class="cl-entry-date">'+d+'</span></div>';
+    if(entry.title)html+='<div class="cl-entry-title">'+escapeHtml(entry.title)+'</div>';
+    entry.changes.forEach(function(ch){html+='<div class="cl-change">'+escapeHtml(ch)+'</div>';});
+    html+='</div>';
+  });
+  body.innerHTML=html;
+}
+function showChangelog(){
+  renderChangelogBody();
+  var v=$("clVersion");if(v)v.textContent="Version "+APP_VERSION;
+  var m=$("changelogModal");if(m)m.classList.add("show");
+}
+function setupChangelog(){
+  // Version display in settings
+  var vt=$("setVersionTxt");if(vt)vt.textContent=APP_VERSION;
+  // Close button
+  var cb=$("clClose");
+  if(cb)cb.addEventListener("click",function(){
+    var m=$("changelogModal");if(m)m.classList.remove("show");
+    try{window.authStore.set("seenVersion",APP_VERSION);}catch(e){}
+  });
+  // "Was ist neu" button in settings
+  var wb=$("setChangelog");
+  if(wb)wb.addEventListener("click",showChangelog);
+  // Auto-show if new version
+  var seen="";
+  try{seen=window.authStore.get("seenVersion")||localStorage.getItem("seenVersion")||"";}catch(e){}
+  if(seen!==APP_VERSION){
+    setTimeout(showChangelog,900);
+  }
+}
+
 // ---- APP STARTUP ----
 (async function init(){
   // Load data: 1) cloud (if token), 2) localStorage, 3) legacy
@@ -4203,6 +4321,7 @@ async function seedFromBrowserStore(){
   renderApptTplBar();
   renderTodoTplBar();
   setInterval(cloudPull,5*60*1000);
+  setupChangelog();
 
   // Initial cloud sync: push local data to cloud so badge confirms sync
   if(getCloudToken() && CLOUD_API_BASE){
@@ -4219,14 +4338,14 @@ async function seedFromBrowserStore(){
 
   // User bar (only if logged in)
   try{
-    var u=localStorage.getItem("lg_user");
+    var u=window.authStore.get("lg_user");
     if(u){
       var user=JSON.parse(u);
       var bar=document.createElement("div");
       bar.className="auth-user-bar";
       bar.innerHTML='<span class="uname">'+(user.displayName||user.username)+'</span><button id="logoutBtn">Abmelden</button>';
       document.body.appendChild(bar);
-      document.getElementById("logoutBtn").addEventListener("click",async function(){if(confirm("Abmelden? Deine Daten sind in der Cloud gespeichert.")){try{await cloudPush();}catch(e){}localStorage.removeItem("lg_auth_token");localStorage.removeItem("lg_user");location.reload();}});
+      document.getElementById("logoutBtn").addEventListener("click",async function(){if(confirm("Abmelden? Deine Daten sind in der Cloud gespeichert.")){try{await cloudPush();}catch(e){}window.authStore.remove("lg_auth_token");window.authStore.remove("lg_user");location.reload();}});
     }
   }catch(e){}
 })();
