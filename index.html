@@ -52,27 +52,79 @@
 </div>
 <script>
 (function(){
-  // Skip lockscreen if already logged in
-  if(window.authStore && window.authStore.get("lg_auth_token")){
-    var lsEl=document.getElementById("lockscreen");
-    if(lsEl)lsEl.parentNode.removeChild(lsEl);
-    return;
-  }
+  var lsEl=document.getElementById("lockscreen");
+  if(!lsEl)return;
+  var alreadyLoggedIn=window.authStore && window.authStore.get("lg_auth_token");
+
   // Lock date
-  var DAYS=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
-  var MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
-  var n=new Date();var ld=document.getElementById("lockDate");
-  if(ld)ld.textContent=DAYS[(n.getDay()+6)%7]+", "+n.getDate()+". "+MONTHS[n.getMonth()]+" "+n.getFullYear();
-  // Slide to unlock
+  function updateLockDate(){
+    var DAYS=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+    var MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+    var n=new Date();var ld=document.getElementById("lockDate");
+    if(ld)ld.textContent=DAYS[(n.getDay()+6)%7]+", "+n.getDate()+". "+MONTHS[n.getMonth()]+" "+n.getFullYear();
+  }
+  updateLockDate();
+
   var handle=document.getElementById("lockHandle"),track=document.getElementById("lockTrack"),label=document.getElementById("lockTrackLabel");
-  if(!handle||!track)return;
-  var startX=0,dx=0,maxDx=0,dragging=false;
-  function onStart(e){dragging=true;handle.classList.remove("snap");startX=(e.touches?e.touches[0]:e).clientX-dx;maxDx=track.offsetWidth-handle.offsetWidth-10;}
-  function onMove(e){if(!dragging)return;e.preventDefault();var cx=(e.touches?e.touches[0]:e).clientX;dx=Math.max(0,Math.min(cx-startX,maxDx));handle.style.transform="translateX("+dx+"px)";if(label)label.style.opacity=Math.max(0,1-dx/(maxDx*0.5));}
-  function onEnd(){if(!dragging)return;dragging=false;if(dx>maxDx*0.65){handle.classList.add("snap");handle.style.transform="translateX("+maxDx+"px)";document.getElementById("lockscreen").classList.add("unlocked");}else{handle.classList.add("snap");handle.style.transform="translateX(0)";dx=0;if(label)label.style.opacity=1;}}
-  handle.addEventListener("mousedown",onStart);handle.addEventListener("touchstart",onStart,{passive:false});
-  document.addEventListener("mousemove",onMove);document.addEventListener("touchmove",onMove,{passive:false});
-  document.addEventListener("mouseup",onEnd);document.addEventListener("touchend",onEnd);
+
+  function lockNow(){
+    updateLockDate();
+    lsEl.classList.remove("unlocked");
+    if(handle){handle.classList.remove("snap");handle.style.transform="translateX(0)";}
+    if(label)label.style.opacity=1;
+  }
+  function unlockNow(){
+    lsEl.classList.add("unlocked");
+    resetInactivity();
+  }
+  // Expose so app can re-lock if needed
+  window.__lockScreen=lockNow;
+
+  // If already logged in, show unlocked immediately (no swipe needed on first load)
+  if(alreadyLoggedIn){
+    lsEl.classList.add("unlocked");
+  }
+
+  if(handle&&track){
+    var startX=0,dx=0,maxDx=0,dragging=false;
+    function onStart(e){dragging=true;handle.classList.remove("snap");startX=(e.touches?e.touches[0]:e).clientX-dx;maxDx=track.offsetWidth-handle.offsetWidth-10;}
+    function onMove(e){if(!dragging)return;e.preventDefault();var cx=(e.touches?e.touches[0]:e).clientX;dx=Math.max(0,Math.min(cx-startX,maxDx));handle.style.transform="translateX("+dx+"px)";if(label)label.style.opacity=Math.max(0,1-dx/(maxDx*0.5));}
+    function onEnd(){if(!dragging)return;dragging=false;if(dx>maxDx*0.65){handle.classList.add("snap");handle.style.transform="translateX("+maxDx+"px)";unlockNow();}else{handle.classList.add("snap");handle.style.transform="translateX(0)";dx=0;if(label)label.style.opacity=1;}}
+    handle.addEventListener("mousedown",onStart);handle.addEventListener("touchstart",onStart,{passive:false});
+    document.addEventListener("mousemove",onMove);document.addEventListener("touchmove",onMove,{passive:false});
+    document.addEventListener("mouseup",onEnd);document.addEventListener("touchend",onEnd);
+  }
+
+  // ---- Inaktivitäts-Sperre nach 10 Minuten (nur Handy) ----
+  var INACTIVITY_MS=10*60*1000; // 10 Minuten
+  var inactivityTimer=null;
+  function isLocked(){return !lsEl.classList.contains("unlocked");}
+  function resetInactivity(){
+    if(inactivityTimer)clearTimeout(inactivityTimer);
+    // Nur auf Mobilgeräten automatisch sperren
+    if(window.isMobileDevice && window.isMobileDevice()){
+      inactivityTimer=setTimeout(function(){
+        if(!isLocked())lockNow();
+      },INACTIVITY_MS);
+    }
+  }
+  function activity(){ if(!isLocked())resetInactivity(); }
+  ["touchstart","touchmove","mousedown","mousemove","keydown","scroll","click"].forEach(function(ev){
+    document.addEventListener(ev,activity,{passive:true});
+  });
+  // Auch beim Zurückkehren zur App prüfen (z.B. App war im Hintergrund)
+  var backgroundedAt=null;
+  document.addEventListener("visibilitychange",function(){
+    if(document.hidden){backgroundedAt=Date.now();}
+    else{
+      if(backgroundedAt && window.isMobileDevice && window.isMobileDevice()){
+        var away=Date.now()-backgroundedAt;
+        if(away>=INACTIVITY_MS && !isLocked())lockNow();
+      }
+      resetInactivity();
+    }
+  });
+  resetInactivity();
 })();
 </script>
 
@@ -171,8 +223,10 @@ window.authStore={
     window.authStore.set("lg_user",JSON.stringify(user));
     var o=document.getElementById("authOverlay");
     if(o)o.parentNode.removeChild(o);
+    // Lockscreen NICHT entfernen — nur entsperren, damit Inaktivitäts-Sperre funktioniert
     var ls=document.getElementById("lockscreen");
-    if(ls)ls.parentNode.removeChild(ls);
+    if(ls)ls.classList.add("unlocked");
+    if(window.__lockScreenReady)window.__lockScreenReady();
   }
   // check existing session
   try{
