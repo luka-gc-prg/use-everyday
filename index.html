@@ -266,9 +266,11 @@ window.authStore={
   :root[data-world="persoenlich"]{
     --gold:#d9685b;--gold-dim:#9e463d;--accent:#d9685b;--accent-dim:#9e463d;--accent-faint:rgba(217,104,91,.12);
   }
-  :root[data-world="kalender"]{
-    --gold:#b08ad6;--gold-dim:#7a5a9e;--accent:#b08ad6;--accent-dim:#7a5a9e;--accent-faint:rgba(176,138,214,.12);
+  :root[data-world="kalender"]{  --gold:#b08ad6;--gold-dim:#7a5a9e;--accent:#b08ad6;--accent-dim:#7a5a9e;--accent-faint:rgba(176,138,214,.12);
   }
+  :root[data-world="soziales"]{  --gold:#5fb8a8;--gold-dim:#3d8578;--accent:#5fb8a8;--accent-dim:#3d8578;--accent-faint:rgba(95,184,168,.12);
+  }
+  :root[data-theme="light"][data-world="soziales"]{--gold:#2f7a6a;--gold-dim:#5fb8a8;--accent:#2f7a6a;--accent-dim:#5fb8a8;--accent-faint:rgba(47,122,106,.1)}
   :root[data-theme="light"][data-world="finanzen"]{--gold:#3f7a32;--gold-dim:#6fae5e;--accent:#3f7a32;--accent-dim:#6fae5e;--accent-faint:rgba(63,122,50,.1)}
   :root[data-theme="light"][data-world="schule"]{--gold:#2f5e8c;--gold-dim:#5b9bd9;--accent:#2f5e8c;--accent-dim:#5b9bd9;--accent-faint:rgba(47,94,140,.1)}
   :root[data-theme="light"][data-world="persoenlich"]{--gold:#a8392c;--gold-dim:#d9685b;--accent:#a8392c;--accent-dim:#d9685b;--accent-faint:rgba(168,57,44,.1)}
@@ -892,6 +894,62 @@ window.authStore={
   .todaySection{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;overflow:hidden}
   .widget-toolbar{display:flex;justify-content:flex-end;margin-top:14px}
   .widget-edit-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:12px;padding:8px 14px;border-radius:20px;cursor:pointer;font-family:"DM Mono",monospace;letter-spacing:.04em;transition:.15s}
+  /* ===== SOZIALES ===== */
+  .soz-tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px}
+  .soz-tab{flex:1;padding:10px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;border-radius:8px;font-family:"DM Sans",sans-serif;transition:.15s}
+  .soz-tab.active{background:var(--accent-faint);color:var(--gold)}
+  .soz-panel{display:none}
+  .soz-panel.active{display:block}
+  .soz-add{display:flex;gap:8px}
+  .soz-add input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:14px;box-sizing:border-box;font-family:"DM Sans",sans-serif}
+  .soz-add button{white-space:nowrap;padding:12px 16px;border-radius:10px;border:1px solid var(--gold);background:var(--accent-faint);color:var(--gold);font-size:13px;cursor:pointer;font-family:"DM Sans",sans-serif}
+  .soz-add button:hover{background:var(--gold);color:#1a1408}
+  .soz-err{color:var(--red);font-size:12.5px;min-height:16px;margin-top:8px}
+  .soz-sec-title{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+  .soz-note{font-size:12px;color:var(--muted);line-height:1.5}
+  .soz-empty{font-size:13px;color:var(--muted);text-align:center;padding:24px 12px}
+  .friend-item,.chat-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+  .friend-av,.chat-av{flex:none;width:42px;height:42px;border-radius:50%;background:var(--accent-faint);color:var(--gold);display:grid;place-items:center;font-family:"Bebas Neue",sans-serif;font-size:18px}
+  .friend-info,.chat-info{flex:1;min-width:0}
+  .friend-name,.chat-name{font-size:14px;color:var(--text);font-weight:600}
+  .friend-email,.chat-preview{font-size:12px;color:var(--muted);font-family:"DM Mono",monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chat-preview{font-family:"DM Sans",sans-serif}
+  .friend-actions{display:flex;gap:6px}
+  .friend-actions button{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);cursor:pointer;font-size:12px;font-family:"DM Sans",sans-serif}
+  .fa-accept{border-color:var(--gold)!important;color:var(--gold)}
+  .fa-decline,.fa-remove{color:var(--red)}
+  .chat-item{cursor:pointer;transition:.15s}
+  .chat-item:hover{border-color:var(--gold-dim)}
+  .chat-badge{flex:none;background:var(--gold);color:#1a1408;font-size:11px;font-weight:600;min-width:20px;height:20px;border-radius:10px;display:grid;place-items:center;padding:0 6px}
+  /* Chat conversation */
+  .chat-header{display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .chat-back{background:none;border:none;color:var(--gold);font-size:26px;cursor:pointer;line-height:1;padding:0 4px}
+  .chat-with{font-family:"Bebas Neue",sans-serif;font-size:20px;letter-spacing:.02em;color:var(--text)}
+  .chat-messages{min-height:40vh;max-height:56vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px}
+  .msg{max-width:78%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.4;word-wrap:break-word}
+  .msg.mine{align-self:flex-end;background:var(--gold);color:#1a1408;border-bottom-right-radius:5px}
+  .msg.theirs{align-self:flex-start;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-bottom-left-radius:5px}
+  .msg-time{font-size:10px;opacity:.6;margin-top:3px;font-family:"DM Mono",monospace}
+  .msg-appt{align-self:flex-start;max-width:82%;background:var(--panel);border:1px solid var(--gold-dim);border-radius:14px;padding:12px 14px}
+  .msg-appt.mine{align-self:flex-end}
+  .msg-appt-title{font-weight:600;font-size:14px;color:var(--gold);margin-bottom:4px}
+  .msg-appt-detail{font-size:12px;color:var(--muted);font-family:"DM Mono",monospace}
+  .msg-appt-add{margin-top:8px;padding:6px 12px;border-radius:8px;border:1px solid var(--gold);background:var(--accent-faint);color:var(--gold);font-size:12px;cursor:pointer}
+  .msg-file{align-self:flex-start;display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;text-decoration:none;color:var(--text);max-width:78%}
+  .msg-file.mine{align-self:flex-end}
+  .msg-file-icon{font-size:22px}
+  .msg-file-name{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .chat-input-bar{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+  .chat-input-bar input{flex:1;padding:12px 16px;border-radius:22px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:14px;font-family:"DM Sans",sans-serif}
+  .chat-attach,.chat-send{flex:none;width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;font-size:18px;display:grid;place-items:center}
+  .chat-attach{background:var(--panel-2);border:1px solid var(--line);color:var(--gold)}
+  .chat-send{background:var(--gold);color:#1a1408}
+  .chat-attach-menu{display:flex;gap:8px;margin-top:10px}
+  .chat-attach-menu button{flex:1;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:13px;cursor:pointer;font-family:"DM Sans",sans-serif}
+  .chat-attach-menu button:hover{border-color:var(--gold)}
+  .share-item2{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;margin-bottom:6px}
+  .share-item2 span{font-size:13px;color:var(--text);font-family:"DM Mono",monospace;overflow:hidden;text-overflow:ellipsis}
+  .share-item2 button{flex:none;width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:none;color:var(--red);cursor:pointer;font-size:14px}
   .widget-edit-btn:hover{border-color:var(--gold);color:var(--gold)}
   .widget-edit-btn.active{background:var(--accent-faint);border-color:var(--gold);color:var(--gold)}
   .widget{position:relative}
@@ -1070,6 +1128,7 @@ window.authStore={
       <button class="world" data-world="kalender">Kalender</button>
       <button class="world" data-world="schule">Journal</button>
       <button class="world" data-world="persoenlich">Personalien</button>
+      <button class="world" data-world="soziales">Soziales</button>
     </div>
     <nav class="tabs">
       <button data-tab="home" data-world="home" class="active">Übersicht</button>
@@ -1082,6 +1141,7 @@ window.authStore={
       <button data-tab="notizen" data-world="schule">Notizen</button>
       <button data-tab="aufgaben" data-world="schule">Aufgaben</button>
       <button data-tab="dokumente" data-world="persoenlich">Dokumente</button>
+      <button data-tab="soziales" data-world="soziales">Freunde & Chat</button>
     </nav>
   </header>
 
@@ -1721,6 +1781,78 @@ window.authStore={
     <div id="dList"></div>
   </section>
 
+  <!-- ============ SOZIALES (Freunde & Chat) ============ -->
+  <section class="view" id="view-soziales">
+    <div class="soz-tabs">
+      <button class="soz-tab active" data-soz="chats">💬 Chats</button>
+      <button class="soz-tab" data-soz="friends">👥 Freunde</button>
+      <button class="soz-tab" data-soz="calendars">📅 Kalender</button>
+    </div>
+
+    <!-- CHATS -->
+    <div class="soz-panel active" id="sozChats">
+      <div id="chatListView">
+        <div id="chatList"></div>
+        <div class="soz-empty" id="chatListEmpty" style="display:none">Noch keine Chats. Füge zuerst Freunde hinzu, dann kannst du ihnen schreiben.</div>
+      </div>
+      <div id="chatConversation" style="display:none">
+        <div class="chat-header">
+          <button class="chat-back" id="chatBack">‹</button>
+          <span class="chat-with" id="chatWith">—</span>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-bar">
+          <button class="chat-attach" id="chatAttach" title="Anhängen">＋</button>
+          <input type="text" id="chatInput" placeholder="Nachricht schreiben …">
+          <button class="chat-send" id="chatSend">➤</button>
+        </div>
+        <div class="chat-attach-menu" id="chatAttachMenu" style="display:none">
+          <button id="chatAttachAppt">📅 Termin teilen</button>
+          <button id="chatAttachFile">📎 Datei senden</button>
+        </div>
+        <input type="file" id="chatFileInput" style="display:none">
+      </div>
+    </div>
+
+    <!-- FRIENDS -->
+    <div class="soz-panel" id="sozFriends">
+      <div class="soz-add">
+        <input type="email" id="friendEmailInput" placeholder="E-Mail-Adresse des Freundes">
+        <button id="friendAddBtn">+ Anfrage senden</button>
+      </div>
+      <div class="soz-err" id="friendErr"></div>
+
+      <div id="friendIncomingWrap" style="display:none">
+        <div class="soz-sec-title">Freundschaftsanfragen</div>
+        <div id="friendIncoming"></div>
+      </div>
+
+      <div class="soz-sec-title">Meine Freunde</div>
+      <div id="friendList"></div>
+      <div class="soz-empty" id="friendListEmpty">Noch keine Freunde. Sende oben eine Anfrage.</div>
+
+      <div id="friendOutgoingWrap" style="display:none">
+        <div class="soz-sec-title">Gesendete Anfragen</div>
+        <div id="friendOutgoing"></div>
+      </div>
+    </div>
+
+    <!-- SHARED CALENDARS -->
+    <div class="soz-panel" id="sozCalendars">
+      <div class="soz-sec-title">Meinen Kalender freigeben</div>
+      <div class="soz-note">Freunde sehen nur deine Termine – keine Finanzen, Notizen oder Verdienst.</div>
+      <div class="soz-add" style="margin-top:10px">
+        <input type="email" id="shareEmailInput2" placeholder="E-Mail der Person">
+        <button id="shareAddBtn2">+ Freigeben</button>
+      </div>
+      <div id="shareList2" style="margin-top:8px"></div>
+
+      <div class="soz-sec-title" style="margin-top:20px">Mit mir geteilte Kalender</div>
+      <button class="setBtn" id="loadSharedBtn2" style="margin-bottom:10px">🔄 Aktualisieren</button>
+      <div id="sharedWithMeList2"></div>
+    </div>
+  </section>
+
   <!-- ============ GALERIE ============ -->
 
   <input type="file" id="importFile" accept="application/json,.json" style="display:none">
@@ -1959,7 +2091,7 @@ async function switchTab(t){
   document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab===t));
   document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));
   const v=$("view-"+t);if(v)v.classList.add("active");
-  $("eyebrow").textContent={home:"Übersicht · Finanzen & Journal",start:"Übersicht",monat:"Monatsübersicht · Saldo",kalender:"Arbeitszeiten & Termine",extra:"Zusätzliches Einkommen",tagesausgaben:"Tägliche Ausgaben",ausgaben:"Rechnungen & Wiederkehrend",notizen:"Journal · Notizen & Bilder",aufgaben:"Journal · Aufgaben & Fristen",dokumente:"Personalien · Dokumente",galerie:"Personalien · Galerie"}[t]||"Übersicht";
+  $("eyebrow").textContent={home:"Übersicht · Finanzen & Journal",start:"Übersicht",monat:"Monatsübersicht · Saldo",kalender:"Arbeitszeiten & Termine",extra:"Zusätzliches Einkommen",tagesausgaben:"Tägliche Ausgaben",ausgaben:"Rechnungen & Wiederkehrend",notizen:"Journal · Notizen & Bilder",aufgaben:"Journal · Aufgaben & Fristen",dokumente:"Personalien · Dokumente",galerie:"Personalien · Galerie",soziales:"Soziales · Freunde & Chat"}[t]||"Übersicht";
   if(t==="home"){await materializeRecurring();renderHomeLanding();}
   else if(t==="start"){await materializeRecurring();renderHome();}
   else if(t==="monat"){await materializeRecurring();renderMonth();}
@@ -1970,12 +2102,13 @@ async function switchTab(t){
   else if(t==="notizen")renderNotes();
   else if(t==="aufgaben")renderTodos();
   else if(t==="dokumente")renderDocs();
+  else if(t==="soziales"){if(typeof sozShowTab==="function")sozShowTab("chats");if(typeof loadFriends==="function")loadFriends();}
   window.scrollTo({top:0,behavior:"smooth"});
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 
 let world="home";
-const WORLD_DEFAULT={home:"home",finanzen:"start",kalender:"kalender",schule:"notizen",persoenlich:"dokumente"};
+const WORLD_DEFAULT={home:"home",finanzen:"start",kalender:"kalender",schule:"notizen",persoenlich:"dokumente",soziales:"soziales"};
 const WORLD_TITLE={home:"Mein <span class='accent'>Überblick</span>",finanzen:"Meine <span class='accent'>Finanzen</span>",kalender:"Mein <span class='accent'>Kalender</span>",schule:"Mein <span class='accent'>Journal</span>",persoenlich:"Meine <span class='accent'>Personalien</span>"};
 function renderWorld(w){
   world=w;
@@ -4520,6 +4653,257 @@ function renderWidgetFinance(){
   }catch(e){}
 }
 
+// ---- SOZIALES: Freunde & Chat ----
+let friendsData={friends:[],incoming:[],outgoing:[]};
+let currentChatWith=null;
+let chatPollTimer=null;
+
+function sozApi(path,opts){
+  var token=getCloudToken();
+  opts=opts||{};
+  opts.headers=Object.assign({"Authorization":"Bearer "+token},opts.headers||{});
+  return fetch(CLOUD_API_BASE+path,opts);
+}
+
+function initials(name){
+  var p=(name||"?").trim().split(/\s+/);
+  if(p.length>=2)return (p[0][0]+p[1][0]).toUpperCase();
+  return (name||"?").slice(0,2).toUpperCase();
+}
+
+async function loadFriends(){
+  try{
+    var r=await sozApi("/api/friends");
+    if(r.ok){friendsData=await r.json();renderFriends();renderChatList();}
+  }catch(e){}
+}
+
+function renderFriends(){
+  // Incoming requests
+  var iw=$("friendIncomingWrap"),il=$("friendIncoming");
+  if(friendsData.incoming&&friendsData.incoming.length){
+    iw.style.display="";
+    il.innerHTML=friendsData.incoming.map(function(f){
+      return '<div class="friend-item"><div class="friend-av">'+initials(f.displayName)+'</div>'
+        +'<div class="friend-info"><div class="friend-name">'+escapeHtml(f.displayName)+'</div><div class="friend-email">'+escapeHtml(f.email)+'</div></div>'
+        +'<div class="friend-actions"><button class="fa-accept" data-acc="'+escapeHtml(f.email)+'">Annehmen</button><button class="fa-decline" data-dec="'+escapeHtml(f.email)+'">✕</button></div></div>';
+    }).join("");
+    il.querySelectorAll(".fa-accept").forEach(function(b){b.onclick=function(){respondFriend(b.dataset.acc,true);};});
+    il.querySelectorAll(".fa-decline").forEach(function(b){b.onclick=function(){respondFriend(b.dataset.dec,false);};});
+  }else{iw.style.display="none";}
+  // Friends
+  var fl=$("friendList"),fe=$("friendListEmpty");
+  if(friendsData.friends&&friendsData.friends.length){
+    fe.style.display="none";
+    fl.innerHTML=friendsData.friends.map(function(f){
+      return '<div class="friend-item"><div class="friend-av">'+initials(f.displayName)+'</div>'
+        +'<div class="friend-info"><div class="friend-name">'+escapeHtml(f.displayName)+'</div><div class="friend-email">'+escapeHtml(f.email)+'</div></div>'
+        +'<div class="friend-actions"><button data-chat="'+escapeHtml(f.email)+'">💬</button><button class="fa-remove" data-rem="'+escapeHtml(f.email)+'">Entfernen</button></div></div>';
+    }).join("");
+    fl.querySelectorAll("[data-chat]").forEach(function(b){b.onclick=function(){switchTab("soziales");sozShowTab("chats");openChat(b.dataset.chat);};});
+    fl.querySelectorAll(".fa-remove").forEach(function(b){b.onclick=function(){removeFriend(b.dataset.rem);};});
+  }else{fe.style.display="";fl.innerHTML="";}
+  // Outgoing
+  var ow=$("friendOutgoingWrap"),ol=$("friendOutgoing");
+  if(friendsData.outgoing&&friendsData.outgoing.length){
+    ow.style.display="";
+    ol.innerHTML=friendsData.outgoing.map(function(f){
+      return '<div class="friend-item"><div class="friend-av">'+initials(f.displayName)+'</div>'
+        +'<div class="friend-info"><div class="friend-name">'+escapeHtml(f.displayName)+'</div><div class="friend-email">'+escapeHtml(f.email)+'</div></div>'
+        +'<div class="friend-actions"><span style="font-size:12px;color:var(--muted)">ausstehend</span></div></div>';
+    }).join("");
+  }else{ow.style.display="none";}
+}
+
+async function sendFriendRequest(email){
+  var err=$("friendErr");err.textContent="";
+  try{
+    var r=await sozApi("/api/friends/request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:email})});
+    var d=await r.json();
+    if(!r.ok){err.textContent=d.error||"Fehler";return;}
+    $("friendEmailInput").value="";
+    hint(d.status==="friends"?"✓ Ihr seid jetzt befreundet!":"✓ Anfrage gesendet",2500);
+    loadFriends();
+  }catch(e){err.textContent="Verbindungsfehler";}
+}
+async function respondFriend(from,accept){
+  try{await sozApi("/api/friends/respond",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({from:from,accept:accept})});loadFriends();}catch(e){}
+}
+async function removeFriend(email){
+  if(!confirm("Freund entfernen?"))return;
+  try{await sozApi("/api/friends/remove",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({friend:email})});loadFriends();}catch(e){}
+}
+
+function renderChatList(){
+  var box=$("chatList"),empty=$("chatListEmpty");
+  if(!friendsData.friends||!friendsData.friends.length){box.innerHTML="";empty.style.display="";return;}
+  empty.style.display="none";
+  box.innerHTML=friendsData.friends.map(function(f){
+    return '<div class="chat-item" data-chat="'+escapeHtml(f.email)+'"><div class="chat-av">'+initials(f.displayName)+'</div>'
+      +'<div class="chat-info"><div class="chat-name">'+escapeHtml(f.displayName)+'</div><div class="chat-preview">Tippen zum Öffnen</div></div></div>';
+  }).join("");
+  box.querySelectorAll(".chat-item").forEach(function(c){c.onclick=function(){openChat(c.dataset.chat);};});
+}
+
+function friendName(email){
+  var f=(friendsData.friends||[]).find(function(x){return x.email===email;});
+  return f?f.displayName:email;
+}
+
+async function openChat(email){
+  currentChatWith=email;
+  $("chatListView").style.display="none";
+  $("chatConversation").style.display="";
+  $("chatWith").textContent=friendName(email);
+  $("chatMessages").innerHTML='<div class="soz-empty">Lädt …</div>';
+  await loadMessages();
+  if(chatPollTimer)clearInterval(chatPollTimer);
+  chatPollTimer=setInterval(loadMessages,4000);
+}
+
+function closeChat(){
+  currentChatWith=null;
+  if(chatPollTimer){clearInterval(chatPollTimer);chatPollTimer=null;}
+  $("chatConversation").style.display="none";
+  $("chatListView").style.display="";
+}
+
+async function loadMessages(){
+  if(!currentChatWith)return;
+  try{
+    var r=await sozApi("/api/messages?with="+encodeURIComponent(currentChatWith));
+    if(r.ok){var d=await r.json();renderMessages(d.messages||[]);}
+  }catch(e){}
+}
+
+function renderMessages(msgs){
+  var box=$("chatMessages");if(!box)return;
+  var me=(JSON.parse(window.authStore.get("lg_user")||"{}")).username;
+  if(!msgs.length){box.innerHTML='<div class="soz-empty">Noch keine Nachrichten. Schreib die erste!</div>';return;}
+  var html="";
+  msgs.forEach(function(m){
+    var mine=m.from===me;
+    var t=new Date(m.ts).toLocaleTimeString("de-CH",{hour:"2-digit",minute:"2-digit"});
+    if(m.type==="appointment"&&m.appointment){
+      var a=m.appointment;
+      var when=a.date+(a.allDay?" · ganztägig":(a.start?" · "+a.start+(a.end?"–"+a.end:""):""));
+      html+='<div class="msg-appt'+(mine?" mine":"")+'"><div class="msg-appt-title">📅 '+escapeHtml(a.title||"Termin")+'</div><div class="msg-appt-detail">'+escapeHtml(when)+'</div>'+(mine?'':'<button class="msg-appt-add" data-appt=\''+escapeHtml(JSON.stringify(a))+'\'>+ In meinen Kalender</button>')+'<div class="msg-time">'+t+'</div></div>';
+    }else if(m.type==="file"&&m.file){
+      html+='<a class="msg-file'+(mine?" mine":"")+'" href="'+m.file.data+'" download="'+escapeHtml(m.file.name)+'"><span class="msg-file-icon">📎</span><span class="msg-file-name">'+escapeHtml(m.file.name)+'</span></a>';
+    }else{
+      html+='<div class="msg '+(mine?"mine":"theirs")+'">'+escapeHtml(m.text||"")+'<div class="msg-time">'+t+'</div></div>';
+    }
+  });
+  box.innerHTML=html;
+  box.querySelectorAll(".msg-appt-add").forEach(function(b){
+    b.onclick=async function(){
+      try{
+        var a=JSON.parse(b.dataset.appt);
+        appointments.push({id:Date.now()+"-"+Math.random().toString(36).slice(2,6),title:a.title,date:a.date,start:a.start||"",end:a.end||"",allDay:!!a.allDay,cat:a.cat||"termin"});
+        await save("appt:list",appointments);
+        renderCalendar();renderHomeLanding();
+        hint("✓ Termin hinzugefügt",2000);
+        b.textContent="✓ Hinzugefügt";b.disabled=true;
+      }catch(e){}
+    };
+  });
+  box.scrollTop=box.scrollHeight;
+}
+
+async function sendMessage(payload){
+  if(!currentChatWith)return;
+  payload.to=currentChatWith;
+  try{
+    var r=await sozApi("/api/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(r.ok)await loadMessages();
+    else{var d=await r.json();hint(d.error||"Senden fehlgeschlagen",2500);}
+  }catch(e){hint("Verbindungsfehler",2000);}
+}
+
+function sozShowTab(name){
+  document.querySelectorAll(".soz-tab").forEach(function(t){t.classList.toggle("active",t.dataset.soz===name);});
+  document.querySelectorAll(".soz-panel").forEach(function(p){p.classList.remove("active");});
+  var map={chats:"sozChats",friends:"sozFriends",calendars:"sozCalendars"};
+  var el=$(map[name]);if(el)el.classList.add("active");
+  if(name==="chats"){closeChat();renderChatList();}
+  if(name==="friends")loadFriends();
+  if(name==="calendars"){loadShares2();loadSharedCalendars2();}
+}
+
+// Calendar sharing (in social section)
+async function loadShares2(){
+  try{var r=await sozApi("/api/shares");if(r.ok){var d=await r.json();myShares=d.shareWith||[];renderShareList2();}}catch(e){}
+}
+function renderShareList2(){
+  var box=$("shareList2");if(!box)return;
+  if(!myShares.length){box.innerHTML='<div class="soz-note">Noch niemand.</div>';return;}
+  box.innerHTML=myShares.map(function(e){return '<div class="share-item2"><span>'+escapeHtml(e)+'</span><button data-rem="'+escapeHtml(e)+'">×</button></div>';}).join("");
+  box.querySelectorAll("[data-rem]").forEach(function(b){b.onclick=async function(){myShares=myShares.filter(function(x){return x!==b.dataset.rem;});await saveShares();renderShareList2();};});
+}
+async function loadSharedCalendars2(){
+  try{var r=await sozApi("/api/shared-calendars");if(r.ok){var d=await r.json();sharedCalendars=d.calendars||[];renderSharedWithMe2();try{renderCalendar();renderHomeLanding();}catch(e){}}}catch(e){}
+}
+function renderSharedWithMe2(){
+  var box=$("sharedWithMeList2");if(!box)return;
+  if(!sharedCalendars.length){box.innerHTML='<div class="soz-note">Noch keine Kalender mit dir geteilt.</div>';return;}
+  box.innerHTML=sharedCalendars.map(function(cal){
+    var col=sharedColorFor(cal.owner);
+    return '<div class="share-item2"><span style="display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:50%;background:'+col+'"></span>'+escapeHtml(cal.displayName)+' · '+cal.appointments.length+' Termine</span></div>';
+  }).join("");
+}
+
+function setupSocial(){
+  // Tab switching
+  document.querySelectorAll(".soz-tab").forEach(function(t){t.onclick=function(){sozShowTab(t.dataset.soz);};});
+  // Friend add
+  var fab=$("friendAddBtn");
+  if(fab)fab.onclick=function(){var em=($("friendEmailInput").value||"").toLowerCase().trim();if(em)sendFriendRequest(em);};
+  var fei=$("friendEmailInput");
+  if(fei)fei.addEventListener("keydown",function(e){if(e.key==="Enter")$("friendAddBtn").click();});
+  // Chat back
+  var cb=$("chatBack");if(cb)cb.onclick=closeChat;
+  // Chat send
+  var cs=$("chatSend");if(cs)cs.onclick=function(){var v=($("chatInput").value||"").trim();if(!v)return;$("chatInput").value="";sendMessage({type:"text",text:v});};
+  var ci=$("chatInput");if(ci)ci.addEventListener("keydown",function(e){if(e.key==="Enter")$("chatSend").click();});
+  // Attach menu
+  var ca=$("chatAttach");if(ca)ca.onclick=function(){var m=$("chatAttachMenu");m.style.display=m.style.display==="none"?"flex":"none";};
+  var caa=$("chatAttachAppt");if(caa)caa.onclick=function(){$("chatAttachMenu").style.display="none";pickApptToShare();};
+  var caf=$("chatAttachFile");if(caf)caf.onclick=function(){$("chatAttachMenu").style.display="none";$("chatFileInput").click();};
+  var cfi=$("chatFileInput");if(cfi)cfi.onchange=function(){handleChatFile(cfi.files[0]);cfi.value="";};
+  // Calendar sharing (social section)
+  var sab=$("shareAddBtn2");
+  if(sab)sab.onclick=async function(){
+    var em=($("shareEmailInput2").value||"").toLowerCase().trim();
+    if(!em||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){hint("Ungültige E-Mail");return;}
+    if(myShares.indexOf(em)<0){myShares.push(em);await saveShares();renderShareList2();$("shareEmailInput2").value="";hint("✓ Freigegeben für "+em,2500);}
+  };
+  var sei2=$("shareEmailInput2");if(sei2)sei2.addEventListener("keydown",function(e){if(e.key==="Enter")$("shareAddBtn2").click();});
+  var lsb2=$("loadSharedBtn2");if(lsb2)lsb2.onclick=async function(){this.disabled=true;this.textContent="Lädt …";await loadSharedCalendars2();this.disabled=false;this.textContent="🔄 Aktualisieren";};
+  // Initial load
+  loadFriends();
+}
+
+function pickApptToShare(){
+  var upcoming=appointments.filter(function(a){return a.date>=ymd(new Date());}).sort(function(a,b){return (a.date+(a.start||"")).localeCompare(b.date+(b.start||""));}).slice(0,20);
+  if(!upcoming.length){hint("Keine kommenden Termine zum Teilen");return;}
+  var list=upcoming.map(function(a,i){return (i+1)+". "+a.title+" ("+a.date+(a.start?" "+a.start:"")+")";}).join("\n");
+  var pick=prompt("Welchen Termin teilen? Nummer eingeben:\n\n"+list);
+  if(!pick)return;
+  var idx=parseInt(pick,10)-1;
+  if(idx>=0&&idx<upcoming.length){
+    var a=upcoming[idx];
+    sendMessage({type:"appointment",appointment:{title:a.title,date:a.date,start:a.start,end:a.end,allDay:a.allDay,cat:a.cat}});
+  }
+}
+
+function handleChatFile(file){
+  if(!file)return;
+  if(file.size>3*1024*1024){hint("Datei zu gross (max 3 MB)",2500);return;}
+  var reader=new FileReader();
+  reader.onload=function(){sendMessage({type:"file",file:{name:file.name,data:reader.result}});};
+  reader.readAsDataURL(file);
+}
+
 // ---- KALENDER TEILEN ----
 let myShares=[]; // Liste von E-Mails mit denen ich teile
 
@@ -4785,6 +5169,7 @@ function setupChangelog(){
   setupChangelog();
   setupSharing();
   setupWidgets();
+  setupSocial();
 
   // Initial cloud sync: push local data to cloud so badge confirms sync
   if(getCloudToken() && CLOUD_API_BASE){
