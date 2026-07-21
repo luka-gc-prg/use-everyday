@@ -253,13 +253,12 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 .hub-hero .hub-val{font-family:"Bebas Neue",sans-serif;font-size:32px;letter-spacing:.02em;line-height:1;margin-top:6px}
 .hub-hero .hub-sub{font-size:12px;margin-top:3px;opacity:.7}
 .hub-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.hub-card .hub-ico{font-size:20px}
-.hub-card .hub-lbl{display:block;margin-top:8px}
+.hub-card .hub-lbl{display:block}
 .hub-card .hub-val{font-size:16px;font-weight:500;margin-top:2px;color:var(--text)}
 .h-fin{background:#1a2420;border-color:#2d5245}.h-fin .hub-lbl{color:#5fb8a8}.h-fin .hub-val{color:#7fd4c2}.h-fin .hub-sub{color:#6b8079}
-.h-auf{background:#1a1f2b;border-color:#2d3d59}.h-auf .hub-lbl,.h-auf .hub-ico{color:#7aa6d6}
-.h-arb{background:#241a26;border-color:#4a2d52}.h-arb .hub-lbl,.h-arb .hub-ico{color:#b08ad6}
-.h-not{background:#261e1a;border-color:#573a2d}.h-not .hub-lbl,.h-not .hub-ico{color:#d99b6a}
+.h-auf{background:#1a1f2b;border-color:#2d3d59}.h-auf .hub-lbl{color:#7aa6d6}
+.h-arb{background:#241a26;border-color:#4a2d52}.h-arb .hub-lbl{color:#b08ad6}
+.h-not{background:#261e1a;border-color:#573a2d}.h-not .hub-lbl{color:#d99b6a}
 /* Heute-Karte */
 .today-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:.5px solid var(--line)}
 .today-item:last-child{border-bottom:none}
@@ -304,7 +303,8 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 /* Untere Navigation */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:100;background:rgba(22,24,29,.92);backdrop-filter:blur(14px);border-top:.5px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px calc(env(safe-area-inset-bottom,0px) + 8px)}
 .tab{flex:1;max-width:96px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-family:"DM Sans",sans-serif;color:var(--mut2);border-radius:12px;transition:.15s}
-.tab .t-ico{font-size:20px;line-height:1}
+.tab .t-ico{display:grid;place-items:center;line-height:1}
+.tab .t-ico svg{width:21px;height:21px}
 .tab .t-lbl{font-size:10px;letter-spacing:.03em}
 .tab.on{color:var(--acc)}
 /* Ansichten */
@@ -336,8 +336,8 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
       <div class="head-greet" id="headGreet">Guten Tag</div>
     </div>
     <div class="head-right">
-      <span class="sync" id="syncBadge">☁ …</span>
-      <button class="gear" id="gearBtn" title="Einstellungen">⚙</button>
+      <span class="sync" id="syncBadge">Sync …</span>
+      <button class="gear" id="gearBtn" title="Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="17" height="17"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2.2" fill="#1e2128"/><circle cx="15" cy="12" r="2.2" fill="#1e2128"/><circle cx="10.5" cy="17" r="2.2" fill="#1e2128"/></svg></button>
     </div>
   </div>
 
@@ -345,29 +345,28 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
   <section class="view on" id="v-home">
     <div class="hub">
       <button class="hub-hero h-fin" data-go="finanzen">
-        <span class="hub-lbl">💰 FINANZEN</span>
+        <span class="hub-lbl">FINANZEN</span>
         <div class="hub-val" id="hubSaldo">CHF 0</div>
         <div class="hub-sub">verfügbar diesen Monat</div>
       </button>
       <div class="hub-row">
         <button class="hub-card h-auf" data-go="aufgaben">
-          <span class="hub-ico">✅</span><span class="hub-lbl">AUFGABEN</span>
+          <span class="hub-lbl">AUFGABEN</span>
           <span class="hub-val" id="hubTasks">0 offen</span>
         </button>
         <button class="hub-card h-arb" data-go="arbeit">
-          <span class="hub-ico">⏱</span><span class="hub-lbl">ARBEIT</span>
+          <span class="hub-lbl">ARBEIT</span>
           <span class="hub-val" id="hubHours">0 h</span>
         </button>
       </div>
       <button class="hub-card h-not" data-go="notizen" style="display:flex;align-items:center;gap:12px">
-        <span class="hub-ico">📓</span>
         <span style="flex:1"><span class="hub-lbl">NOTIZEN · SCHULE</span><span class="hub-val" id="hubNotes" style="display:block">0 Notizen</span></span>
         <span style="color:#d99b6a;font-size:20px;opacity:.6">›</span>
       </button>
     </div>
 
     <div class="sec-title">Heute</div>
-    <div class="card" id="todayCard"><div class="empty">Nichts geplant — geniess den Tag ☺</div></div>
+    <div class="card" id="todayCard"><div class="empty">Nichts geplant — geniess den Tag</div></div>
   </section>
 
   <!-- ===== AUFGABEN ===== -->
@@ -429,32 +428,62 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
   <section class="view" id="v-finanzen">
     <div class="card">
       <div class="fin-head">
-        <div class="fin-big" id="finSaldo">CHF 0</div>
-        <div class="fin-sub" id="finMonthLabel">verfügbar · —</div>
+        <div class="fin-big" id="finFree">CHF 0</div>
+        <div class="fin-sub" id="finMonthLabel">frei verfügbar · —</div>
       </div>
       <div class="fin-split">
         <div class="fin-cell"><span>Einkommen</span><b id="finInc" style="color:var(--green)">CHF 0</b></div>
-        <div class="fin-cell"><span>Ausgaben</span><b id="finExp" style="color:var(--red)">CHF 0</b></div>
+        <div class="fin-cell"><span>Rechnungen offen</span><b id="finBills" style="color:var(--red)">CHF 0</b></div>
+      </div>
+      <div class="fin-split" style="margin-top:10px">
+        <div class="fin-cell"><span>Eingeplant</span><b id="finPlanned" style="color:var(--blue)">CHF 0</b></div>
+        <div class="fin-cell"><span>Davon Sparen</span><b id="finSaved" style="color:var(--teal-soft)">CHF 0</b></div>
       </div>
     </div>
 
+    <div class="sec-title">Monats-Aufteilung</div>
     <div class="card">
-      <label for="eDesc">Ausgabe erfassen</label>
-      <input type="text" id="eDesc" placeholder="Wofür? (z.B. Migros)">
       <div class="frow">
-        <div><label for="eAmt">Betrag (CHF)</label><input type="number" id="eAmt" inputmode="decimal" min="0" step="0.05" placeholder="0.00"></div>
-        <div><label for="eDate">Datum</label><input type="date" id="eDate"></div>
+        <div><label for="bName">Wofür</label><input type="text" id="bName" placeholder="z.B. Lebensmittel"></div>
+        <div><label for="bAmt">Betrag (CHF)</label><input type="number" id="bAmt" inputmode="decimal" min="0" step="10" placeholder="0"></div>
       </div>
-      <label for="eCat">Kategorie</label>
-      <select id="eCat"></select>
-      <button class="btn" id="eAdd">+ Ausgabe erfassen</button>
+      <label style="display:flex;align-items:center;gap:9px;margin-top:12px;text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--text2)">
+        <input type="checkbox" id="bSave" style="width:auto;margin:0">
+        Das ist Sparen (kommt auf die Seite)
+      </label>
+      <button class="btn" id="bAdd">Aufteilung hinzufügen</button>
+      <div id="budgetBars" style="margin-top:6px"></div>
     </div>
+    <div class="card" id="budgetList"></div>
 
-    <div class="sec-title">Wofür gebe ich aus?</div>
-    <div class="card" id="catBars"><div class="empty">Noch keine Ausgaben diesen Monat.</div></div>
+    <div class="sec-title">Rechnungen</div>
+    <div class="card">
+      <label for="rTitle">Neue Rechnung</label>
+      <input type="text" id="rTitle" placeholder="z.B. Krankenkasse">
+      <div class="frow">
+        <div><label for="rAmt">Betrag (CHF)</label><input type="number" id="rAmt" inputmode="decimal" min="0" step="0.05" placeholder="0.00"></div>
+        <div><label for="rDate">Fällig am</label><input type="date" id="rDate"></div>
+      </div>
+      <button class="btn" id="rAdd">Rechnung hinzufügen</button>
+    </div>
+    <div class="chips" id="rChips">
+      <button class="chip on" data-rf="open">Offen</button>
+      <button class="chip" data-rf="paid">Bezahlt</button>
+      <button class="chip" data-rf="all">Alle</button>
+    </div>
+    <div class="card" id="billList"></div>
 
-    <div class="sec-title">Letzte Ausgaben</div>
-    <div class="card" id="expList"></div>
+    <div class="sec-title">Zusatzeinkommen</div>
+    <div class="card">
+      <div class="frow">
+        <div><label for="xTitle">Wofür</label><input type="text" id="xTitle" placeholder="z.B. Nachhilfe"></div>
+        <div><label for="xAmt">Betrag (CHF)</label><input type="number" id="xAmt" inputmode="decimal" min="0" step="0.05" placeholder="0.00"></div>
+      </div>
+      <label for="xDate">Datum</label>
+      <input type="date" id="xDate">
+      <button class="btn" id="xAdd">Einkommen hinzufügen</button>
+    </div>
+    <div class="card" id="extraList"></div>
   </section>
 
   <!-- ===== NOTIZEN ===== -->
@@ -474,11 +503,11 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 
 <!-- Untere Navigation -->
 <nav class="tabbar">
-  <button class="tab on" data-tab="home"><span class="t-ico">🏠</span><span class="t-lbl">Übersicht</span></button>
-  <button class="tab" data-tab="aufgaben"><span class="t-ico">✅</span><span class="t-lbl">Aufgaben</span></button>
-  <button class="tab" data-tab="arbeit"><span class="t-ico">⏱</span><span class="t-lbl">Arbeit</span></button>
-  <button class="tab" data-tab="finanzen"><span class="t-ico">💰</span><span class="t-lbl">Finanzen</span></button>
-  <button class="tab" data-tab="notizen"><span class="t-ico">📓</span><span class="t-lbl">Notizen</span></button>
+  <button class="tab on" data-tab="home"><span class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></span><span class="t-lbl">Übersicht</span></button>
+  <button class="tab" data-tab="aufgaben"><span class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12l2.5 2.5 5-5.5"/></svg></span><span class="t-lbl">Aufgaben</span></button>
+  <button class="tab" data-tab="arbeit"><span class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><span class="t-lbl">Arbeit</span></button>
+  <button class="tab" data-tab="finanzen"><span class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10.5h18"/><path d="M15.5 15h2.5"/></svg></span><span class="t-lbl">Finanzen</span></button>
+  <button class="tab" data-tab="notizen"><span class="t-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h8.5L19 8v12.5H6z"/><path d="M9.5 12h5M9.5 15.5h5"/></svg></span><span class="t-lbl">Notizen</span></button>
 </nav>
 
 <!-- Einstellungen -->
@@ -491,11 +520,11 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
     </div>
     <div class="set-row">
       <div class="set-txt"><b>Von Cloud laden</b><span>Neuesten Stand holen (überschreibt lokale Änderungen)</span></div>
-      <button class="set-btn" id="setPull">⬇ Laden</button>
+      <button class="set-btn" id="setPull">Laden</button>
     </div>
     <div class="set-row">
       <div class="set-txt"><b>In Cloud sichern</b><span>Diesen Stand hochladen</span></div>
-      <button class="set-btn" id="setPush">⬆ Sichern</button>
+      <button class="set-btn" id="setPush">Sichern</button>
     </div>
     <button class="btn ghost" id="sheetClose" style="margin-top:16px">Schliessen</button>
   </div>
@@ -508,8 +537,6 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 const $=id=>document.getElementById(id);
 const DAYS=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
 const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
-const CATS=["Essen & Trinken","Snacks & Kaffee","Transport","Einkauf","Freizeit","Kleidung","Gesundheit","Geschenke","Sonstiges"];
-const CAT_COLORS={"Essen & Trinken":"#e08f9b","Snacks & Kaffee":"#d6a05a","Transport":"#7aa6d6","Einkauf":"#7fa86b","Freizeit":"#8a7cc7","Kleidung":"#5fb8a8","Gesundheit":"#c47b6e","Geschenke":"#c8a96e","Sonstiges":"#7c8290"};
 function ymd(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function parseYmd(s){const p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
 function ddmm(d){return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+".";}
@@ -525,7 +552,8 @@ function fmtH(min){const h=Math.floor(min/60),m=min%60;return m?h+"h "+m+"m":h+"
 const API="https://use-everyday.luka-gc.workers.dev";
 const LS_KEY="arbeitszeit-rechner-db";
 let mem={};            // kompletter Cloud-Datensatz (unbekannte Felder bleiben erhalten!)
-let todos=[],notes=[],shiftsAll=[],dailyExp=[],wage=0;
+let todos=[],notes=[],shiftsAll=[],bills=[],extraInc=[],budgets=[],wage=0;
+let billFilter="open";
 let viewYM={y:new Date().getFullYear(),m:new Date().getMonth()};
 let taskFilter="open";
 let dirty=false,pushTimer=null,editExpId=null;
@@ -538,7 +566,9 @@ function loadFromMem(){
   todos=Array.isArray(mem["todos:list"])?mem["todos:list"]:[];
   notes=Array.isArray(mem["notes:list"])?mem["notes:list"]:[];
   shiftsAll=Array.isArray(mem["appt:list"])?mem["appt:list"]:[];
-  dailyExp=Array.isArray(mem["daily:list"])?mem["daily:list"]:[];
+  bills=Array.isArray(mem["expenses:list"])?mem["expenses:list"]:[];
+  extraInc=Array.isArray(mem["extra:list"])?mem["extra:list"]:[];
+  budgets=Array.isArray(mem["budget:list"])?mem["budget:list"]:[];
 }
 function saveKey(k,v){mem[k]=v;persistLocal();schedulePush();}
 function persistLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(mem));}catch(e){}}
@@ -548,23 +578,23 @@ async function cloudPull(){
   const t=getToken();if(!t)return false;
   try{
     const r=await fetch(API+"/api/data",{headers:{"Authorization":"Bearer "+t}});
-    if(r.status===401){setBadge("err","☁ Abgemeldet");return false;}
+    if(r.status===401){setBadge("err","Abgemeldet");return false;}
     if(!r.ok)throw 0;
     const d=await r.json();
     if(d&&typeof d==="object"&&Object.keys(d).length){mem=d;persistLocal();}
-    setBadge("ok","☁ Synchronisiert");
+    setBadge("ok","Synchronisiert");
     return true;
-  }catch(e){setBadge("err","☁ Offline");return false;}
+  }catch(e){setBadge("err","Offline");return false;}
 }
 async function cloudPush(){
   const t=getToken();if(!t)return false;
   try{
-    setBadge("","☁ Sichert …");
+    setBadge("","Sichert …");
     const r=await fetch(API+"/api/data",{method:"POST",headers:{"Authorization":"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify(mem)});
     if(!r.ok)throw 0;
-    dirty=false;setBadge("ok","☁ Synchronisiert");
+    dirty=false;setBadge("ok","Synchronisiert");
     return true;
-  }catch(e){setBadge("err","☁ Sichern fehlgeschlagen");return false;}
+  }catch(e){setBadge("err","Sichern fehlgeschlagen");return false;}
 }
 function schedulePush(){dirty=true;if(pushTimer)clearTimeout(pushTimer);pushTimer=setTimeout(cloudPush,1500);}
 
@@ -594,7 +624,6 @@ function monthStats(y,m){
   const inc1=min1/60*wage,inc2=min2/60*wage;
   return {min:min1+min2,inc:inc1+inc2,inc1,inc2};
 }
-function monthExpenses(y,m){return dailyExp.filter(e=>{const d=parseYmd(e.date);return d.getFullYear()===y&&d.getMonth()===m;});}
 
 /* ================= ÜBERSICHT ================= */
 function renderHead(){
@@ -607,8 +636,10 @@ function renderHead(){
 function renderHome(){
   const y=new Date().getFullYear(),m=new Date().getMonth();
   const st=monthStats(y,m);
-  const exp=monthExpenses(y,m).reduce((s,e)=>s+(+e.amount||0),0);
-  $("hubSaldo").textContent="CHF "+fmt0(st.inc-exp);
+  const extraSum=monthExtra(y,m).reduce((s,e)=>s+(+e.amount||0),0);
+  const billsOpen=bills.filter(b=>b.status!=="paid").reduce((s,b)=>s+(+b.amount||0),0);
+  const planned=budgets.reduce((s,b)=>s+(+b.amount||0),0);
+  $("hubSaldo").textContent="CHF "+fmt0(st.inc+extraSum-billsOpen-planned);
   const open=todos.filter(t=>!t.done).length;
   $("hubTasks").textContent=open+" offen";
   $("hubHours").textContent=fmtH(st.min);
@@ -621,7 +652,7 @@ function renderHome(){
   todos.filter(t=>!t.done&&t.due&&parseYmd(t.due)<parseYmd(today)).forEach(t=>items.push({c:"#e08f7c",t:t.title,r:"überfällig"}));
   $("todayCard").innerHTML=items.length
     ?items.map(i=>'<div class="today-item"><span class="dot" style="background:'+i.c+'"></span><span style="flex:1;font-size:14px">'+esc(i.t)+'</span><span style="font-family:DM Mono,monospace;font-size:11px;color:var(--mut)">'+esc(i.r)+'</span></div>').join("")
-    :'<div class="empty">Nichts geplant — geniess den Tag ☺</div>';
+    :'<div class="empty">Nichts geplant — geniess den Tag</div>';
 }
 
 /* ================= AUFGABEN ================= */
@@ -635,7 +666,7 @@ function renderTasks(){
     if(!!a.done!==!!b.done)return a.done?1:-1;
     return (a.due||"9999").localeCompare(b.due||"9999");
   });
-  if(!list.length){box.innerHTML='<div class="empty">'+(taskFilter==="done"?"Noch nichts erledigt.":"Keine Aufgaben — alles erledigt ☺")+'</div>';return;}
+  if(!list.length){box.innerHTML='<div class="empty">'+(taskFilter==="done"?"Noch nichts erledigt.":"Keine Aufgaben — alles erledigt")+'</div>';return;}
   box.innerHTML=list.map(t=>{
     const over=!t.done&&t.due&&parseYmd(t.due)<t0;
     let meta=t.done?"erledigt ✓":(t.due?(over?'<span class="overdue">überfällig · '+ddmm(parseYmd(t.due))+'</span>':"fällig "+ddmm(parseYmd(t.due))+parseYmd(t.due).getFullYear()):"ohne Frist");
@@ -707,66 +738,118 @@ $("mPrev").onclick=()=>{viewYM.m--;if(viewYM.m<0){viewYM.m=11;viewYM.y--;}render
 $("mNext").onclick=()=>{viewYM.m++;if(viewYM.m>11){viewYM.m=0;viewYM.y++;}renderArbeit();};
 
 /* ================= FINANZEN ================= */
+const BUDGET_COLORS=["#7aa6d6","#8fb996","#d99b6a","#b08ad6","#e08f9b","#5fb8a8","#c8a96e","#7fa86b","#7c8290"];
+function budgetColor(i){return BUDGET_COLORS[i%BUDGET_COLORS.length];}
+
 function renderFinanzen(){
   const y=new Date().getFullYear(),m=new Date().getMonth();
   const st=monthStats(y,m);
-  const monthExp=monthExpenses(y,m);
-  const expSum=monthExp.reduce((s,e)=>s+(+e.amount||0),0);
-  $("finSaldo").textContent="CHF "+fmt0(st.inc-expSum);
-  $("finMonthLabel").textContent="verfügbar · "+MONTHS[m]+" "+y;
-  $("finInc").textContent="CHF "+fmt0(st.inc);
-  $("finExp").textContent="CHF "+fmt0(expSum);
-  // Balken nach Kategorie
-  const totals={};
-  monthExp.forEach(e=>{const c=e.cat||"Sonstiges";totals[c]=(totals[c]||0)+(+e.amount||0);});
-  const entries=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
-  if(entries.length){
-    const max=entries[0][1];
-    $("catBars").innerHTML=entries.map(([cat,amt])=>{
-      const pct=Math.round(amt/max*100),share=Math.round(amt/expSum*100);
-      const col=CAT_COLORS[cat]||"#7c8290";
-      return '<div class="bar-row"><div class="bar-head"><span class="bar-name">'+esc(cat)+' · '+share+'%</span><span class="bar-amt">CHF '+fmt0(amt)+'</span></div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+col+'"></div></div></div>';
-    }).join("");
-  }else{
-    $("catBars").innerHTML='<div class="empty">Noch keine Ausgaben diesen Monat.</div>';
+  const extraSum=monthExtra(y,m).reduce((s,e)=>s+(+e.amount||0),0);
+  const income=st.inc+extraSum;
+  const billsOpen=bills.filter(b=>b.status!=="paid").reduce((s,b)=>s+(+b.amount||0),0);
+  const planned=budgets.reduce((s,b)=>s+(+b.amount||0),0);
+  const saved=budgets.filter(b=>b.save).reduce((s,b)=>s+(+b.amount||0),0);
+  $("finFree").textContent="CHF "+fmt0(income-billsOpen-planned);
+  $("finMonthLabel").textContent="frei verfügbar · "+MONTHS[m]+" "+y;
+  $("finInc").textContent="CHF "+fmt0(income);
+  $("finBills").textContent="CHF "+fmt0(billsOpen);
+  $("finPlanned").textContent="CHF "+fmt0(planned);
+  $("finSaved").textContent="CHF "+fmt0(saved);
+  renderBudgets(income);
+  renderBills();
+  renderExtra();
+}
+
+/* --- Monats-Aufteilung --- */
+function renderBudgets(income){
+  const total=budgets.reduce((s,b)=>s+(+b.amount||0),0);
+  const bars=$("budgetBars"),list=$("budgetList");
+  if(!budgets.length){
+    bars.innerHTML="";
+    list.innerHTML='<div class="empty">Noch nichts eingeplant. Teile dein Einkommen oben auf.</div>';
+    return;
   }
-  // Liste (letzte 25)
-  const sorted=dailyExp.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,25);
-  $("expList").innerHTML=sorted.length
-    ?sorted.map(e=>{
-      const col=CAT_COLORS[e.cat]||"#7c8290";
-      return '<div class="item"><div class="item-main"><div class="item-title">'+esc(e.desc||e.cat)+'</div><div class="item-meta">'+ddmm(parseYmd(e.date))+parseYmd(e.date).getFullYear()+' · <span style="color:'+col+'">'+esc(e.cat||"Sonstiges")+'</span></div></div><span class="item-amt">CHF '+fmt(+e.amount||0)+'</span><button class="ibtn edit" data-eedit="'+e.id+'">✎</button><button class="ibtn del" data-edel="'+e.id+'">×</button></div>';
-    }).join("")
-    :'<div class="empty">Noch keine Ausgaben erfasst.</div>';
-  $("expList").querySelectorAll("[data-edel]").forEach(b=>b.onclick=()=>{
-    if(!confirm("Ausgabe löschen?"))return;
-    dailyExp=dailyExp.filter(x=>x.id!==b.dataset.edel);
-    saveKey("daily:list",dailyExp);renderFinanzen();renderHome();
-  });
-  $("expList").querySelectorAll("[data-eedit]").forEach(b=>b.onclick=()=>{
-    const e=dailyExp.find(x=>x.id===b.dataset.eedit);if(!e)return;
-    editExpId=e.id;
-    $("eDesc").value=e.desc||"";$("eAmt").value=e.amount;$("eDate").value=e.date;$("eCat").value=e.cat||"Sonstiges";
-    $("eAdd").textContent="✓ Änderung speichern";
-    $("eDesc").scrollIntoView({behavior:"smooth",block:"center"});
+  const max=Math.max.apply(null,budgets.map(b=>+b.amount||0));
+  bars.innerHTML=budgets.map((b,i)=>{
+    const amt=+b.amount||0,pct=max?Math.round(amt/max*100):0;
+    const share=total?Math.round(amt/total*100):0;
+    return '<div class="bar-row"><div class="bar-head"><span class="bar-name">'+esc(b.name)+(b.save?' <span style="color:var(--teal-soft)">· Sparen</span>':'')+' · '+share+'%</span><span class="bar-amt">CHF '+fmt0(amt)+'</span></div><div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+(b.save?"#5fb8a8":budgetColor(i))+'"></div></div></div>';
+  }).join("");
+  list.innerHTML=budgets.map((b,i)=>'<div class="item"><span class="dot" style="background:'+(b.save?"#5fb8a8":budgetColor(i))+'"></span><div class="item-main"><div class="item-title">'+esc(b.name)+'</div><div class="item-meta">'+(b.save?"Sparen":"pro Monat eingeplant")+'</div></div><span class="item-amt">CHF '+fmt0(+b.amount||0)+'</span><button class="ibtn del" data-bdel="'+b.id+'">×</button></div>').join("");
+  list.querySelectorAll("[data-bdel]").forEach(btn=>btn.onclick=()=>{
+    budgets=budgets.filter(x=>x.id!==btn.dataset.bdel);
+    saveKey("budget:list",budgets);renderFinanzen();renderHome();
   });
 }
-$("eAdd").onclick=()=>{
-  const amt=parseFloat($("eAmt").value)||0;
+$("bAdd").onclick=()=>{
+  const name=$("bName").value.trim(),amt=parseFloat($("bAmt").value)||0;
+  if(!name){toast("Bitte angeben, wofür");return;}
   if(!amt){toast("Bitte einen Betrag eingeben");return;}
-  const desc=$("eDesc").value.trim(),date=$("eDate").value||ymd(new Date()),cat=$("eCat").value;
-  if(editExpId){
-    const e=dailyExp.find(x=>x.id===editExpId);
-    if(e){e.desc=desc||cat;e.amount=amt;e.date=date;e.cat=cat;}
-    editExpId=null;$("eAdd").textContent="+ Ausgabe erfassen";
-    toast("✓ Ausgabe aktualisiert");
-  }else{
-    dailyExp.push({id:uid(),date,amount:amt,desc:desc||cat,cat});
-    toast("✓ Ausgabe erfasst");
-  }
-  saveKey("daily:list",dailyExp);
-  $("eDesc").value="";$("eAmt").value="";$("eDate").value=ymd(new Date());
-  renderFinanzen();renderHome();
+  budgets.push({id:uid(),name,amount:amt,save:$("bSave").checked});
+  saveKey("budget:list",budgets);
+  $("bName").value="";$("bAmt").value="";$("bSave").checked=false;
+  toast("Aufteilung gespeichert");renderFinanzen();renderHome();
+};
+
+/* --- Rechnungen --- */
+function renderBills(){
+  const box=$("billList"),t0=parseYmd(ymd(new Date()));
+  let list=bills.slice();
+  if(billFilter==="open")list=list.filter(b=>b.status!=="paid");
+  if(billFilter==="paid")list=list.filter(b=>b.status==="paid");
+  list.sort((a,b)=>(a.date||"9999").localeCompare(b.date||"9999"));
+  if(!list.length){box.innerHTML='<div class="empty">'+(billFilter==="paid"?"Noch nichts bezahlt.":"Keine offenen Rechnungen.")+'</div>';return;}
+  box.innerHTML=list.map(b=>{
+    const paid=b.status==="paid";
+    const over=!paid&&b.date&&parseYmd(b.date)<t0;
+    const meta=paid?"bezahlt":(b.date?(over?'<span class="overdue">überfällig · '+ddmm(parseYmd(b.date))+'</span>':"fällig "+ddmm(parseYmd(b.date))+parseYmd(b.date).getFullYear()):"ohne Frist");
+    return '<div class="item'+(paid?' task-done':'')+'"><button class="chk'+(paid?' done':'')+'" data-btgl="'+b.id+'">✓</button><div class="item-main"><div class="item-title">'+esc(b.title)+'</div><div class="item-meta">'+meta+'</div></div><span class="item-amt">CHF '+fmt(+b.amount||0)+'</span><button class="ibtn del" data-rdel="'+b.id+'">×</button></div>';
+  }).join("");
+  box.querySelectorAll("[data-btgl]").forEach(btn=>btn.onclick=()=>{
+    const b=bills.find(x=>x.id===btn.dataset.btgl);if(!b)return;
+    b.status=b.status==="paid"?"open":"paid";
+    saveKey("expenses:list",bills);renderFinanzen();renderHome();
+  });
+  box.querySelectorAll("[data-rdel]").forEach(btn=>btn.onclick=()=>{
+    if(!confirm("Rechnung löschen?"))return;
+    bills=bills.filter(x=>x.id!==btn.dataset.rdel);
+    saveKey("expenses:list",bills);renderFinanzen();renderHome();
+  });
+}
+$("rAdd").onclick=()=>{
+  const title=$("rTitle").value.trim(),amt=parseFloat($("rAmt").value)||0;
+  if(!title){toast("Bitte einen Namen eingeben");return;}
+  if(!amt){toast("Bitte einen Betrag eingeben");return;}
+  bills.push({id:uid(),title,amount:amt,date:$("rDate").value||ymd(new Date()),status:"open"});
+  saveKey("expenses:list",bills);
+  $("rTitle").value="";$("rAmt").value="";
+  toast("Rechnung hinzugefügt");renderFinanzen();renderHome();
+};
+document.querySelectorAll("#rChips .chip").forEach(c=>c.onclick=()=>{
+  document.querySelectorAll("#rChips .chip").forEach(x=>x.classList.remove("on"));
+  c.classList.add("on");billFilter=c.dataset.rf;renderBills();
+});
+
+/* --- Zusatzeinkommen --- */
+function monthExtra(y,m){return extraInc.filter(e=>{const d=parseYmd(e.date);return d.getFullYear()===y&&d.getMonth()===m;});}
+function renderExtra(){
+  const box=$("extraList");
+  const list=extraInc.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,20);
+  if(!list.length){box.innerHTML='<div class="empty">Kein Zusatzeinkommen erfasst.</div>';return;}
+  box.innerHTML=list.map(e=>'<div class="item"><div class="item-main"><div class="item-title">'+esc(e.title||"Einkommen")+'</div><div class="item-meta">'+ddmm(parseYmd(e.date))+parseYmd(e.date).getFullYear()+'</div></div><span class="item-amt" style="color:var(--green)">+ CHF '+fmt(+e.amount||0)+'</span><button class="ibtn del" data-xdel="'+e.id+'">×</button></div>').join("");
+  box.querySelectorAll("[data-xdel]").forEach(b=>b.onclick=()=>{
+    if(!confirm("Eintrag löschen?"))return;
+    extraInc=extraInc.filter(x=>x.id!==b.dataset.xdel);
+    saveKey("extra:list",extraInc);renderFinanzen();renderHome();
+  });
+}
+$("xAdd").onclick=()=>{
+  const amt=parseFloat($("xAmt").value)||0;
+  if(!amt){toast("Bitte einen Betrag eingeben");return;}
+  extraInc.push({id:uid(),title:$("xTitle").value.trim()||"Zusatzeinkommen",amount:amt,date:$("xDate").value||ymd(new Date())});
+  saveKey("extra:list",extraInc);
+  $("xTitle").value="";$("xAmt").value="";
+  toast("Einkommen hinzugefügt");renderFinanzen();renderHome();
 };
 
 /* ================= NOTIZEN ================= */
@@ -806,13 +889,13 @@ $("setPull").onclick=async function(){
   const ok=await cloudPull();
   if(ok){loadFromMem();renderAll();toast("✓ Von Cloud geladen");}
   else toast("Laden fehlgeschlagen");
-  this.disabled=false;this.textContent="⬇ Laden";
+  this.disabled=false;this.textContent="Laden";
 };
 $("setPush").onclick=async function(){
   this.disabled=true;this.textContent="Sichert …";
   const ok=await cloudPush();
   toast(ok?"✓ In Cloud gesichert":"Sichern fehlgeschlagen");
-  this.disabled=false;this.textContent="⬆ Sichern";
+  this.disabled=false;this.textContent="Sichern";
 };
 
 /* ================= START ================= */
@@ -824,8 +907,8 @@ function renderAll(){renderHead();renderHome();renderTasks();renderArbeit();rend
   // Formular-Standardwerte
   $("tDue").value=ymd(new Date());
   $("sDate").value=ymd(new Date());
-  $("eDate").value=ymd(new Date());
-  $("eCat").innerHTML=CATS.map(c=>'<option value="'+c+'">'+c+'</option>').join("");
+  $("rDate").value=ymd(new Date());
+  $("xDate").value=ymd(new Date());
   // Daten: erst Cloud, sonst lokal
   const fromCloud=await cloudPull();
   if(!fromCloud)loadLocal();
