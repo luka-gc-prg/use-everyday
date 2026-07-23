@@ -295,11 +295,17 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 .note-title{font-size:15px;font-weight:600}
 .note-meta{font-family:"DM Mono",monospace;font-size:11px;color:var(--mut);margin-top:2px}
 .note-text{font-size:13.5px;color:var(--text2);margin-top:8px;line-height:1.5;white-space:pre-wrap}
+.note-card.editing{border-color:var(--acc);border-left-color:var(--acc);background:var(--acc-bg)}
 .note-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
 /* Filter-Chips */
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .chip{padding:7px 14px;border-radius:16px;border:.5px solid var(--line);background:var(--card);color:var(--mut);font-size:12px;cursor:pointer;font-family:"DM Sans",sans-serif}
 .chip.on{border-color:var(--acc);color:var(--acc);background:var(--acc-bg)}
+.fin-detail{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--mut);text-align:center;margin-top:12px;padding-top:11px;border-top:.5px solid var(--line);line-height:1.6}
+.payout-box{margin-top:14px;padding:13px 14px;border-radius:12px;background:var(--acc-bg);border:.5px solid var(--acc-line)}
+.payout-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.payout-val{font-family:"Bebas Neue",sans-serif;font-size:24px;letter-spacing:.02em;color:var(--acc)}
+.payout-sub{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--mut);margin-top:4px;line-height:1.5}
 /* Monats-Gruppen */
 .mgroup+.mgroup{margin-top:6px}
 .mgroup-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 2px 6px;border-bottom:.5px solid var(--line);margin-bottom:2px}
@@ -438,11 +444,18 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
       <div class="arb-sum">
         <div class="arb-cell"><span>Stunden</span><b id="arbHours">0 h</b></div>
         <div class="arb-cell"><span>Stundenlohn</span><b id="arbWage">CHF 0</b></div>
-        <div class="arb-cell"><span>Lohn</span><b id="arbIncome" style="color:var(--purple)">CHF 0</b></div>
+        <div class="arb-cell"><span>Verdient</span><b id="arbIncome" style="color:var(--purple)">CHF 0</b></div>
       </div>
       <div style="margin-top:14px">
-        <div class="pay-row"><span class="pay-lab">1.–15. → Auszahlung am 25.</span><span class="pay-val" id="pay1">CHF 0</span></div>
-        <div class="pay-row"><span class="pay-lab" id="pay2lab">16.–31. → Auszahlung am 10.</span><span class="pay-val" id="pay2">CHF 0</span></div>
+        <div class="pay-row"><span class="pay-lab" id="pay1lab">1.–15. → am 25.</span><span class="pay-val" id="pay1">CHF 0</span></div>
+        <div class="pay-row"><span class="pay-lab" id="pay2lab">16.–31. → am 10.</span><span class="pay-val" id="pay2">CHF 0</span></div>
+      </div>
+      <div class="payout-box">
+        <div class="payout-head">
+          <span class="pay-lab" id="payInLab">Ausbezahlt</span>
+          <span class="payout-val" id="payIn">CHF 0</span>
+        </div>
+        <div class="payout-sub" id="payInSub">—</div>
       </div>
     </div>
 
@@ -470,19 +483,25 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 
   <!-- ===== FINANZEN ===== -->
   <section class="view" id="v-finanzen">
-    <div class="card">
+    <div class="month-nav">
+      <button id="fPrev">‹</button>
+      <span class="mn-label" id="fLabel">—</span>
+      <button id="fNext">›</button>
+    </div>
+    <div class="card" style="margin-top:12px">
       <div class="fin-head">
         <div class="fin-big" id="finFree">CHF 0</div>
         <div class="fin-sub" id="finMonthLabel">frei verfügbar · —</div>
       </div>
       <div class="fin-split">
-        <div class="fin-cell"><span>Einkommen</span><b id="finInc" style="color:var(--green)">CHF 0</b></div>
+        <div class="fin-cell"><span>Ausbezahlt</span><b id="finInc" style="color:var(--green)">CHF 0</b></div>
         <div class="fin-cell"><span>Rechnungen offen · gesamt</span><b id="finBills" style="color:var(--red)">CHF 0</b></div>
       </div>
       <div class="fin-split" style="margin-top:10px">
         <div class="fin-cell"><span>Eingeplant</span><b id="finPlanned" style="color:var(--blue)">CHF 0</b></div>
         <div class="fin-cell"><span>Davon Sparen</span><b id="finSaved" style="color:var(--teal-soft)">CHF 0</b></div>
       </div>
+      <div class="fin-detail" id="finIncDetail">—</div>
     </div>
 
     <div class="sec-title">Monats-Aufteilung</div>
@@ -539,7 +558,8 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
       <input type="text" id="nSubj" placeholder="z.B. Deutsch">
       <label for="nText">Inhalt</label>
       <textarea id="nText" rows="4" placeholder="Notiz schreiben …"></textarea>
-      <button class="btn" id="nAdd">+ Notiz speichern</button>
+      <button class="btn" id="nAdd">Notiz speichern</button>
+      <button class="btn ghost" id="nCancel" style="display:none;margin-top:8px">Abbrechen</button>
     </div>
     <div id="noteList"></div>
   </section>
@@ -666,7 +686,17 @@ function monthStats(y,m){
   let min1=0,min2=0;
   monthShifts(y,m).forEach(s=>{const day=parseYmd(s.date).getDate();const mins=shiftMinutes(s);if(day<=15)min1+=mins;else min2+=mins;});
   const inc1=min1/60*wage,inc2=min2/60*wage;
-  return {min:min1+min2,inc:inc1+inc2,inc1,inc2};
+  return {min:min1+min2,min1,min2,inc:inc1+inc2,inc1,inc2};
+}
+function prevYM(y,m){return m===0?{y:y-1,m:11}:{y:y,m:m-1};}
+function nextYM(y,m){return m===11?{y:y+1,m:0}:{y:y,m:m+1};}
+/* Was in diesem Monat tatsächlich ausgezahlt wird:
+   am 10.: zweite Hälfte des Vormonats · am 25.: erste Hälfte dieses Monats */
+function monthPayout(y,m){
+  const p=prevYM(y,m);
+  const on10=monthStats(p.y,p.m).inc2;
+  const on25=monthStats(y,m).inc1;
+  return {on10,on25,total:on10+on25,prevLabel:MONTHS[p.m]};
 }
 
 /* ================= ÜBERSICHT ================= */
@@ -679,14 +709,14 @@ function renderHead(){
 }
 function renderHome(){
   const y=new Date().getFullYear(),m=new Date().getMonth();
-  const st=monthStats(y,m);
+  const pay=monthPayout(y,m);
   const extraSum=monthExtra(y,m).reduce((s,e)=>s+(+e.amount||0),0);
   const billsOpen=bills.filter(b=>b.status!=="paid").reduce((s,b)=>s+(+b.amount||0),0);
   const planned=budgets.reduce((s,b)=>s+(+b.amount||0),0);
-  $("hubSaldo").textContent="CHF "+fmt0(st.inc+extraSum-billsOpen-planned);
+  $("hubSaldo").textContent="CHF "+fmt0(pay.total+extraSum-billsOpen-planned);
   const open=todos.filter(t=>!t.done).length;
   $("hubTasks").textContent=open+" offen";
-  $("hubHours").textContent=fmtH(st.min);
+  $("hubHours").textContent=fmtH(monthStats(y,m).min);
   $("hubNotes").textContent=notes.length+(notes.length===1?" Notiz":" Notizen");
   // Heute
   const today=ymd(new Date());
@@ -753,25 +783,37 @@ function renderArbeit(){
   const y=viewYM.y,m=viewYM.m;
   $("mLabel").textContent=MONTHS[m]+" "+y;
   const last=new Date(y,m+1,0).getDate();
-  $("pay2lab").textContent="16.–"+last+". → Auszahlung am 10.";
   const st=monthStats(y,m);
+  const pay=monthPayout(y,m);
+  const nx=nextYM(y,m);
   $("arbHours").textContent=fmtH(st.min);
   $("arbWage").textContent="CHF "+fmt(wage);
   $("arbIncome").textContent="CHF "+fmt0(st.inc);
+  // Wann das Geld kommt
+  $("pay1lab").textContent="1.–15. "+MONTHS[m].slice(0,3)+". → am 25. "+MONTHS[m].slice(0,3)+".";
   $("pay1").textContent="CHF "+fmt0(st.inc1);
+  $("pay2lab").textContent="16.–"+last+". "+MONTHS[m].slice(0,3)+". → am 10. "+MONTHS[nx.m].slice(0,3)+".";
   $("pay2").textContent="CHF "+fmt0(st.inc2);
+  // Was in diesem Monat auf dem Konto landet
+  $("payInLab").textContent="Ausbezahlt im "+MONTHS[m];
+  $("payIn").textContent="CHF "+fmt0(pay.total);
+  $("payInSub").textContent="am 10. aus "+pay.prevLabel+": CHF "+fmt0(pay.on10)+" · am 25.: CHF "+fmt0(pay.on25);
   if(!$("sWage").value&&wage)$("sWage").value=wage;
   const list=monthShifts(y,m).sort((a,b)=>b.date.localeCompare(a.date)||b.start.localeCompare(a.start));
   $("shiftList").innerHTML=list.length
     ?list.map(s=>{
       const mins=shiftMinutes(s);
-      return '<div class="item"><div class="item-main"><div class="item-title">'+ddmm(parseYmd(s.date))+parseYmd(s.date).getFullYear()+' · '+esc(s.start)+'–'+esc(s.end)+(s.pause?' <span style="color:var(--mut)">('+s.pause+" Min. Pause)</span>":"")+'</div><div class="item-meta">'+fmtH(mins)+' · CHF '+fmt0(mins/60*wage)+'</div></div><button class="ibtn del" data-sdel="'+s.id+'">×</button></div>';
+      const d=parseYmd(s.date);
+      const pd=d.getDate()<=15
+        ? "→ 25. "+MONTHS[d.getMonth()].slice(0,3)+"."
+        : "→ 10. "+MONTHS[nextYM(d.getFullYear(),d.getMonth()).m].slice(0,3)+".";
+      return '<div class="item"><div class="item-main"><div class="item-title">'+ddmm(d)+d.getFullYear()+' · '+esc(s.start)+'–'+esc(s.end)+(s.pause?' <span style="color:var(--mut)">('+s.pause+" Min. Pause)</span>":"")+'</div><div class="item-meta">'+fmtH(mins)+' · CHF '+fmt0(mins/60*wage)+' <span style="color:var(--purple)">'+pd+'</span></div></div><button class="ibtn del" data-sdel="'+s.id+'">×</button></div>';
     }).join("")
     :'<div class="empty">Noch keine Schichten in diesem Monat.</div>';
   $("shiftList").querySelectorAll("[data-sdel]").forEach(b=>b.onclick=()=>{
     if(!confirm("Schicht löschen?"))return;
     shiftsAll=shiftsAll.filter(x=>x.id!==b.dataset.sdel);
-    saveKey("appt:list",shiftsAll);renderArbeit();renderHome();
+    saveKey("appt:list",shiftsAll);renderArbeit();renderHome();renderFinanzen();
   });
 }
 $("sAdd").onclick=()=>{
@@ -858,11 +900,14 @@ $("cNext").onclick=()=>{calYM.m++;if(calYM.m>11){calYM.m=0;calYM.y++;}calSel=nul
 const BUDGET_COLORS=["#7aa6d6","#8fb996","#d99b6a","#b08ad6","#e08f9b","#5fb8a8","#c8a96e","#7fa86b","#7c8290"];
 function budgetColor(i){return BUDGET_COLORS[i%BUDGET_COLORS.length];}
 
+let finYM={y:new Date().getFullYear(),m:new Date().getMonth()};
+
 function renderFinanzen(){
-  const y=new Date().getFullYear(),m=new Date().getMonth();
-  const st=monthStats(y,m);
+  const y=finYM.y,m=finYM.m;
+  $("fLabel").textContent=MONTHS[m]+" "+y;
+  const pay=monthPayout(y,m);
   const extraSum=monthExtra(y,m).reduce((s,e)=>s+(+e.amount||0),0);
-  const income=st.inc+extraSum;
+  const income=pay.total+extraSum;
   const billsOpen=bills.filter(b=>b.status!=="paid").reduce((s,b)=>s+(+b.amount||0),0);
   const planned=budgets.reduce((s,b)=>s+(+b.amount||0),0);
   const saved=budgets.filter(b=>b.save).reduce((s,b)=>s+(+b.amount||0),0);
@@ -872,10 +917,13 @@ function renderFinanzen(){
   $("finBills").textContent="CHF "+fmt0(billsOpen);
   $("finPlanned").textContent="CHF "+fmt0(planned);
   $("finSaved").textContent="CHF "+fmt0(saved);
+  $("finIncDetail").textContent="Lohn am 10. (aus "+pay.prevLabel+"): CHF "+fmt0(pay.on10)+"  ·  am 25.: CHF "+fmt0(pay.on25)+(extraSum?"  ·  Zusatz: CHF "+fmt0(extraSum):"");
   renderBudgets(income);
   renderBills();
   renderExtra();
 }
+$("fPrev").onclick=()=>{finYM.m--;if(finYM.m<0){finYM.m=11;finYM.y--;}renderFinanzen();};
+$("fNext").onclick=()=>{finYM.m++;if(finYM.m>11){finYM.m=0;finYM.y++;}renderFinanzen();};
 
 /* --- Monats-Aufteilung --- */
 function renderBudgets(income){
@@ -992,6 +1040,7 @@ $("xAdd").onclick=()=>{
 };
 
 /* ================= NOTIZEN ================= */
+let editNoteId=null;
 function renderNotes(){
   const box=$("noteList");
   const list=notes.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));
@@ -999,22 +1048,48 @@ function renderNotes(){
   const groups=groupByMonth(list,true);
   box.innerHTML=groups.map(g=>
     '<div class="mgroup-head" style="margin-top:18px"><span>'+esc(g.label)+'</span><span>'+g.items.length+'</span></div>'
-    +g.items.map(n=>'<div class="note-card"><div class="note-title">'+esc(n.title)+'</div><div class="note-meta">'+(n.date?ddmm(parseYmd(n.date))+parseYmd(n.date).getFullYear():"")+(n.subject?" · "+esc(n.subject):"")+'</div>'+(n.text?'<div class="note-text">'+esc(n.text)+'</div>':'')+'<div class="note-actions"><button class="ibtn del" data-ndel="'+n.id+'">×</button></div></div>').join("")
+    +g.items.map(n=>'<div class="note-card'+(n.id===editNoteId?' editing':'')+'"><div class="note-title">'+esc(n.title)+'</div><div class="note-meta">'+(n.date?ddmm(parseYmd(n.date))+parseYmd(n.date).getFullYear():"")+(n.subject?" · "+esc(n.subject):"")+(n.edited?" · bearbeitet":"")+'</div>'+(n.text?'<div class="note-text">'+esc(n.text)+'</div>':'')+'<div class="note-actions"><button class="ibtn edit" data-nedit="'+n.id+'">✎</button><button class="ibtn del" data-ndel="'+n.id+'">×</button></div></div>').join("")
   ).join("");
+  box.querySelectorAll("[data-nedit]").forEach(b=>b.onclick=()=>{
+    const n=notes.find(x=>x.id===b.dataset.nedit);if(!n)return;
+    editNoteId=n.id;
+    $("nTitle").value=n.title||"";
+    $("nSubj").value=n.subject||"";
+    $("nText").value=n.text||"";
+    $("nAdd").textContent="Änderung speichern";
+    $("nCancel").style.display="";
+    renderNotes();
+    $("nTitle").scrollIntoView({behavior:"smooth",block:"center"});
+  });
   box.querySelectorAll("[data-ndel]").forEach(b=>b.onclick=()=>{
     if(!confirm("Notiz löschen?"))return;
+    if(editNoteId===b.dataset.ndel)resetNoteForm();
     notes=notes.filter(x=>x.id!==b.dataset.ndel);
     saveKey("notes:list",notes);renderNotes();renderHome();
   });
 }
+function resetNoteForm(){
+  editNoteId=null;
+  $("nTitle").value="";$("nSubj").value="";$("nText").value="";
+  $("nAdd").textContent="Notiz speichern";
+  $("nCancel").style.display="none";
+}
 $("nAdd").onclick=()=>{
   const title=$("nTitle").value.trim();
   if(!title){toast("Bitte einen Titel eingeben");return;}
-  notes.push({id:uid(),title,subject:$("nSubj").value.trim(),text:$("nText").value.trim(),date:ymd(new Date())});
+  if(editNoteId){
+    const n=notes.find(x=>x.id===editNoteId);
+    if(n){n.title=title;n.subject=$("nSubj").value.trim();n.text=$("nText").value.trim();n.edited=true;}
+    toast("Notiz aktualisiert");
+  }else{
+    notes.push({id:uid(),title,subject:$("nSubj").value.trim(),text:$("nText").value.trim(),date:ymd(new Date())});
+    toast("Notiz gespeichert");
+  }
   saveKey("notes:list",notes);
-  $("nTitle").value="";$("nSubj").value="";$("nText").value="";
-  toast("✓ Notiz gespeichert");renderNotes();renderHome();
+  resetNoteForm();
+  renderNotes();renderHome();
 };
+$("nCancel").onclick=()=>{resetNoteForm();renderNotes();};
 
 /* ================= EINSTELLUNGEN ================= */
 $("gearBtn").onclick=()=>{$("sheet").classList.add("show");};
