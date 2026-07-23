@@ -300,6 +300,12 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .chip{padding:7px 14px;border-radius:16px;border:.5px solid var(--line);background:var(--card);color:var(--mut);font-size:12px;cursor:pointer;font-family:"DM Sans",sans-serif}
 .chip.on{border-color:var(--acc);color:var(--acc);background:var(--acc-bg)}
+/* Monats-Gruppen */
+.mgroup+.mgroup{margin-top:6px}
+.mgroup-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 2px 6px;border-bottom:.5px solid var(--line);margin-bottom:2px}
+.mgroup-head span:first-child{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--acc)}
+.mgroup-head span:last-child{font-family:"Bebas Neue",sans-serif;font-size:15px;letter-spacing:.02em;color:var(--mut)}
+.mgroup:first-child .mgroup-head{padding-top:0}
 /* Kalender */
 .cal-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
 .cal-nav button{width:34px;height:34px;border-radius:11px;border:.5px solid var(--line);background:var(--card2);color:var(--acc);font-size:17px;cursor:pointer}
@@ -471,7 +477,7 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
       </div>
       <div class="fin-split">
         <div class="fin-cell"><span>Einkommen</span><b id="finInc" style="color:var(--green)">CHF 0</b></div>
-        <div class="fin-cell"><span>Rechnungen offen</span><b id="finBills" style="color:var(--red)">CHF 0</b></div>
+        <div class="fin-cell"><span>Rechnungen offen · gesamt</span><b id="finBills" style="color:var(--red)">CHF 0</b></div>
       </div>
       <div class="fin-split" style="margin-top:10px">
         <div class="fin-cell"><span>Eingeplant</span><b id="finPlanned" style="color:var(--blue)">CHF 0</b></div>
@@ -706,12 +712,17 @@ function renderTasks(){
     return (a.due||"9999").localeCompare(b.due||"9999");
   });
   if(!list.length){box.innerHTML='<div class="empty">'+(taskFilter==="done"?"Noch nichts erledigt.":"Keine Aufgaben — alles erledigt")+'</div>';return;}
-  box.innerHTML=list.map(t=>{
+  function row(t){
     const over=!t.done&&t.due&&parseYmd(t.due)<t0;
     let meta=t.done?"erledigt ✓":(t.due?(over?'<span class="overdue">überfällig · '+ddmm(parseYmd(t.due))+'</span>':"fällig "+ddmm(parseYmd(t.due))+parseYmd(t.due).getFullYear()):"ohne Frist");
     if(t.subject)meta+=" · "+esc(t.subject);
     return '<div class="item'+(t.done?' task-done':'')+'"><button class="chk'+(t.done?' done':'')+'" data-tgl="'+t.id+'">✓</button><div class="item-main"><div class="item-title">'+esc(t.title)+'</div><div class="item-meta">'+meta+'</div></div><button class="ibtn del" data-del="'+t.id+'">×</button></div>';
-  }).join("");
+  }
+  const withDate=list.filter(t=>t.due),noDate=list.filter(t=>!t.due);
+  const groups=groupByMonth(withDate.map(t=>({...t,date:t.due})),taskFilter==="done");
+  let html=groups.map(g=>'<div class="mgroup"><div class="mgroup-head"><span>'+esc(g.label)+'</span><span>'+g.items.length+'</span></div>'+g.items.map(row).join("")+'</div>').join("");
+  if(noDate.length)html+='<div class="mgroup"><div class="mgroup-head"><span>Ohne Frist</span><span>'+noDate.length+'</span></div>'+noDate.map(row).join("")+'</div>';
+  box.innerHTML=html;
   box.querySelectorAll("[data-tgl]").forEach(b=>b.onclick=()=>{
     const t=todos.find(x=>x.id===b.dataset.tgl);if(!t)return;
     t.done=!t.done;if(t.done)t.doneDate=new Date().toISOString();
@@ -898,6 +909,18 @@ $("bAdd").onclick=()=>{
 };
 
 /* --- Rechnungen --- */
+function monthKey(dateStr){const d=parseYmd(dateStr);return MONTHS[d.getMonth()]+" "+d.getFullYear();}
+function groupByMonth(list,newestFirst){
+  const groups={},order=[];
+  list.forEach(x=>{
+    const k=x.date?monthKey(x.date):"Ohne Datum";
+    if(!groups[k]){groups[k]=[];order.push({k,d:x.date||"0000-00-00"});}
+    groups[k].push(x);
+  });
+  order.sort((a,b)=>newestFirst?b.d.localeCompare(a.d):a.d.localeCompare(b.d));
+  return order.map(o=>({label:o.k,items:groups[o.k]}));
+}
+
 function renderBills(){
   const box=$("billList"),t0=parseYmd(ymd(new Date()));
   let list=bills.slice();
@@ -905,11 +928,16 @@ function renderBills(){
   if(billFilter==="paid")list=list.filter(b=>b.status==="paid");
   list.sort((a,b)=>(a.date||"9999").localeCompare(b.date||"9999"));
   if(!list.length){box.innerHTML='<div class="empty">'+(billFilter==="paid"?"Noch nichts bezahlt.":"Keine offenen Rechnungen.")+'</div>';return;}
-  box.innerHTML=list.map(b=>{
-    const paid=b.status==="paid";
-    const over=!paid&&b.date&&parseYmd(b.date)<t0;
-    const meta=paid?"bezahlt":(b.date?(over?'<span class="overdue">überfällig · '+ddmm(parseYmd(b.date))+'</span>':"fällig "+ddmm(parseYmd(b.date))+parseYmd(b.date).getFullYear()):"ohne Frist");
-    return '<div class="item'+(paid?' task-done':'')+'"><button class="chk'+(paid?' done':'')+'" data-btgl="'+b.id+'">✓</button><div class="item-main"><div class="item-title">'+esc(b.title)+'</div><div class="item-meta">'+meta+'</div></div><span class="item-amt">CHF '+fmt(+b.amount||0)+'</span><button class="ibtn del" data-rdel="'+b.id+'">×</button></div>';
+  const groups=groupByMonth(list,billFilter==="paid");
+  box.innerHTML=groups.map(g=>{
+    const sum=g.items.reduce((s,b)=>s+(+b.amount||0),0);
+    const rows=g.items.map(b=>{
+      const paid=b.status==="paid";
+      const over=!paid&&b.date&&parseYmd(b.date)<t0;
+      const meta=paid?"bezahlt":(b.date?(over?'<span class="overdue">überfällig · '+ddmm(parseYmd(b.date))+'</span>':"fällig "+ddmm(parseYmd(b.date))+parseYmd(b.date).getFullYear()):"ohne Frist");
+      return '<div class="item'+(paid?' task-done':'')+'"><button class="chk'+(paid?' done':'')+'" data-btgl="'+b.id+'">✓</button><div class="item-main"><div class="item-title">'+esc(b.title)+'</div><div class="item-meta">'+meta+'</div></div><span class="item-amt">CHF '+fmt(+b.amount||0)+'</span><button class="ibtn del" data-rdel="'+b.id+'">×</button></div>';
+    }).join("");
+    return '<div class="mgroup"><div class="mgroup-head"><span>'+esc(g.label)+'</span><span>CHF '+fmt0(sum)+'</span></div>'+rows+'</div>';
   }).join("");
   box.querySelectorAll("[data-btgl]").forEach(btn=>btn.onclick=()=>{
     const b=bills.find(x=>x.id===btn.dataset.btgl);if(!b)return;
@@ -940,9 +968,14 @@ document.querySelectorAll("#rChips .chip").forEach(c=>c.onclick=()=>{
 function monthExtra(y,m){return extraInc.filter(e=>{const d=parseYmd(e.date);return d.getFullYear()===y&&d.getMonth()===m;});}
 function renderExtra(){
   const box=$("extraList");
-  const list=extraInc.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,20);
+  const list=extraInc.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));
   if(!list.length){box.innerHTML='<div class="empty">Kein Zusatzeinkommen erfasst.</div>';return;}
-  box.innerHTML=list.map(e=>'<div class="item"><div class="item-main"><div class="item-title">'+esc(e.title||"Einkommen")+'</div><div class="item-meta">'+ddmm(parseYmd(e.date))+parseYmd(e.date).getFullYear()+'</div></div><span class="item-amt" style="color:var(--green)">+ CHF '+fmt(+e.amount||0)+'</span><button class="ibtn del" data-xdel="'+e.id+'">×</button></div>').join("");
+  const groups=groupByMonth(list,true);
+  box.innerHTML=groups.map(g=>{
+    const sum=g.items.reduce((s,e)=>s+(+e.amount||0),0);
+    const rows=g.items.map(e=>'<div class="item"><div class="item-main"><div class="item-title">'+esc(e.title||"Einkommen")+'</div><div class="item-meta">'+ddmm(parseYmd(e.date))+parseYmd(e.date).getFullYear()+'</div></div><span class="item-amt" style="color:var(--green)">+ CHF '+fmt(+e.amount||0)+'</span><button class="ibtn del" data-xdel="'+e.id+'">×</button></div>').join("");
+    return '<div class="mgroup"><div class="mgroup-head"><span>'+esc(g.label)+'</span><span style="color:var(--green)">+ CHF '+fmt0(sum)+'</span></div>'+rows+'</div>';
+  }).join("");
   box.querySelectorAll("[data-xdel]").forEach(b=>b.onclick=()=>{
     if(!confirm("Eintrag löschen?"))return;
     extraInc=extraInc.filter(x=>x.id!==b.dataset.xdel);
@@ -962,9 +995,12 @@ $("xAdd").onclick=()=>{
 function renderNotes(){
   const box=$("noteList");
   const list=notes.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));
-  box.innerHTML=list.length
-    ?list.map(n=>'<div class="note-card"><div class="note-title">'+esc(n.title)+'</div><div class="note-meta">'+(n.date?ddmm(parseYmd(n.date))+parseYmd(n.date).getFullYear():"")+(n.subject?" · "+esc(n.subject):"")+'</div>'+(n.text?'<div class="note-text">'+esc(n.text)+'</div>':'')+'<div class="note-actions"><button class="ibtn del" data-ndel="'+n.id+'">×</button></div></div>').join("")
-    :'<div class="empty" style="margin-top:16px">Noch keine Notizen. Schreib die erste!</div>';
+  if(!list.length){box.innerHTML='<div class="empty" style="margin-top:16px">Noch keine Notizen. Schreib die erste!</div>';return;}
+  const groups=groupByMonth(list,true);
+  box.innerHTML=groups.map(g=>
+    '<div class="mgroup-head" style="margin-top:18px"><span>'+esc(g.label)+'</span><span>'+g.items.length+'</span></div>'
+    +g.items.map(n=>'<div class="note-card"><div class="note-title">'+esc(n.title)+'</div><div class="note-meta">'+(n.date?ddmm(parseYmd(n.date))+parseYmd(n.date).getFullYear():"")+(n.subject?" · "+esc(n.subject):"")+'</div>'+(n.text?'<div class="note-text">'+esc(n.text)+'</div>':'')+'<div class="note-actions"><button class="ibtn del" data-ndel="'+n.id+'">×</button></div></div>').join("")
+  ).join("");
   box.querySelectorAll("[data-ndel]").forEach(b=>b.onclick=()=>{
     if(!confirm("Notiz löschen?"))return;
     notes=notes.filter(x=>x.id!==b.dataset.ndel);
