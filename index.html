@@ -306,6 +306,10 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 .payout-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .payout-val{font-family:"Bebas Neue",sans-serif;font-size:24px;letter-spacing:.02em;color:var(--acc)}
 .payout-sub{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--mut);margin-top:4px;line-height:1.5}
+.item.faded{opacity:.45}
+.collapse-btn{width:100%;text-align:left;background:none;border:none;border-top:.5px solid var(--line);margin-top:6px;padding:12px 2px 4px;color:var(--mut);font-size:12px;font-family:"DM Mono",monospace;letter-spacing:.04em;cursor:pointer}
+.collapse-btn:active{color:var(--acc)}
+.collapsed-list{margin-top:2px}
 /* Monats-Gruppen */
 .mgroup+.mgroup{margin-top:6px}
 .mgroup-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 2px 6px;border-bottom:.5px solid var(--line);margin-bottom:2px}
@@ -323,6 +327,8 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 .cal-day{aspect-ratio:1;border:none;background:transparent;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;font-family:"DM Sans",sans-serif;font-size:13px;color:var(--text2);transition:.12s}
 .cal-day.pad{color:var(--mut2);opacity:.35}
 .cal-day.today{background:var(--acc-bg);color:var(--acc);font-weight:600}
+.cal-day.past{opacity:.5}
+.cal-day.past.today{opacity:1}
 .cal-day.sel{outline:1.5px solid var(--acc);outline-offset:-1.5px}
 .cal-day:active{transform:scale(.92)}
 .cal-dots{display:flex;gap:2.5px;height:4px;align-items:center}
@@ -527,6 +533,13 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
         <div><label for="rAmt">Betrag (CHF)</label><input type="number" id="rAmt" inputmode="decimal" min="0" step="0.05" placeholder="0.00"></div>
         <div><label for="rDate">Fällig am</label><input type="date" id="rDate"></div>
       </div>
+      <label for="rRepeat">Wiederholung</label>
+      <select id="rRepeat">
+        <option value="none">Einmalig</option>
+        <option value="monthly">Jeden Monat</option>
+        <option value="quarterly">Alle 3 Monate</option>
+        <option value="yearly">Jedes Jahr</option>
+      </select>
       <button class="btn" id="rAdd">Rechnung hinzufügen</button>
     </div>
     <div class="chips" id="rChips">
@@ -620,6 +633,7 @@ let todos=[],notes=[],shiftsAll=[],bills=[],extraInc=[],budgets=[],wage=0;
 let billFilter="open";
 let viewYM={y:new Date().getFullYear(),m:new Date().getMonth()};
 let taskFilter="open";
+let showPastShifts=false;
 let dirty=false,pushTimer=null,editExpId=null;
 
 function getToken(){return window.authStore.get("lg_auth_token");}
@@ -800,17 +814,27 @@ function renderArbeit(){
   $("payIn").textContent="CHF "+fmt0(pay.total);
   $("payInSub").textContent="am 10. aus "+pay.prevLabel+": CHF "+fmt0(pay.on10)+" · am 25.: CHF "+fmt0(pay.on25);
   if(!$("sWage").value&&wage)$("sWage").value=wage;
-  const list=monthShifts(y,m).sort((a,b)=>b.date.localeCompare(a.date)||b.start.localeCompare(a.start));
-  $("shiftList").innerHTML=list.length
-    ?list.map(s=>{
-      const mins=shiftMinutes(s);
-      const d=parseYmd(s.date);
-      const pd=d.getDate()<=15
-        ? "→ 25. "+MONTHS[d.getMonth()].slice(0,3)+"."
-        : "→ 10. "+MONTHS[nextYM(d.getFullYear(),d.getMonth()).m].slice(0,3)+".";
-      return '<div class="item"><div class="item-main"><div class="item-title">'+ddmm(d)+d.getFullYear()+' · '+esc(s.start)+'–'+esc(s.end)+(s.pause?' <span style="color:var(--mut)">('+s.pause+" Min. Pause)</span>":"")+'</div><div class="item-meta">'+fmtH(mins)+' · CHF '+fmt0(mins/60*wage)+' <span style="color:var(--purple)">'+pd+'</span></div></div><button class="ibtn del" data-sdel="'+s.id+'">×</button></div>';
-    }).join("")
-    :'<div class="empty">Noch keine Schichten in diesem Monat.</div>';
+  const today=ymd(new Date());
+  const all=monthShifts(y,m).sort((a,b)=>b.date.localeCompare(a.date)||b.start.localeCompare(a.start));
+  const upcoming=all.filter(s=>s.date>=today);
+  const past=all.filter(s=>s.date<today);
+  function shiftRow(s,faded){
+    const mins=shiftMinutes(s);
+    const d=parseYmd(s.date);
+    const pd=d.getDate()<=15
+      ? "→ 25. "+MONTHS[d.getMonth()].slice(0,3)+"."
+      : "→ 10. "+MONTHS[nextYM(d.getFullYear(),d.getMonth()).m].slice(0,3)+".";
+    return '<div class="item'+(faded?' faded':'')+'"><div class="item-main"><div class="item-title">'+ddmm(d)+d.getFullYear()+' · '+esc(s.start)+'–'+esc(s.end)+(s.pause?' <span style="color:var(--mut)">('+s.pause+" Min. Pause)</span>":"")+'</div><div class="item-meta">'+fmtH(mins)+' · CHF '+fmt0(mins/60*wage)+' <span style="color:var(--purple)">'+pd+'</span></div></div><button class="ibtn del" data-sdel="'+s.id+'">×</button></div>';
+  }
+  let html="";
+  if(upcoming.length)html+=upcoming.map(s=>shiftRow(s,false)).join("");
+  if(past.length){
+    html+='<button class="collapse-btn" id="shiftPastToggle">Vergangene Schichten ('+past.length+') '+(showPastShifts?"▾":"▸")+'</button>';
+    if(showPastShifts)html+='<div class="collapsed-list">'+past.map(s=>shiftRow(s,true)).join("")+'</div>';
+  }
+  if(!all.length)html='<div class="empty">Noch keine Schichten in diesem Monat.</div>';
+  $("shiftList").innerHTML=html;
+  const tgl=$("shiftPastToggle");if(tgl)tgl.onclick=()=>{showPastShifts=!showPastShifts;renderArbeit();};
   $("shiftList").querySelectorAll("[data-sdel]").forEach(b=>b.onclick=()=>{
     if(!confirm("Schicht löschen?"))return;
     shiftsAll=shiftsAll.filter(x=>x.id!==b.dataset.sdel);
@@ -867,7 +891,7 @@ function renderCal(){
     const ev=calEntries(ds);
     const cols=[...new Set(ev.map(e=>e.c))].slice(0,3);
     const dots=cols.length?'<span class="cal-dots">'+cols.map(c=>'<i style="background:'+c+'"></i>').join("")+'</span>':'<span class="cal-dots"></span>';
-    const cls="cal-day"+(ds===today?" today":"")+(ds===calSel?" sel":"");
+    const cls="cal-day"+(ds===today?" today":"")+(ds===calSel?" sel":"")+(ds<today?" past":"");
     html+='<button class="'+cls+'" data-d="'+ds+'"><span>'+d+'</span>'+dots+'</button>';
   }
   // Tage aus dem Folgemonat auffüllen
@@ -1000,14 +1024,26 @@ function renderBills(){
       const meta=paid
         ?("bezahlt"+(b.paidDate?" am "+ddmm(parseYmd(b.paidDate))+parseYmd(b.paidDate).getFullYear():""))
         :(b.date?(over?'<span class="overdue">überfällig · '+ddmm(parseYmd(b.date))+'</span>':"fällig "+ddmm(parseYmd(b.date))+parseYmd(b.date).getFullYear()):"ohne Frist");
-      return '<div class="item'+(paid?' task-done':'')+'"><button class="chk'+(paid?' done':'')+'" data-btgl="'+b.id+'">✓</button><div class="item-main"><div class="item-title">'+esc(b.title)+'</div><div class="item-meta">'+meta+'</div></div><span class="item-amt">CHF '+fmt(+b.amount||0)+'</span><button class="ibtn del" data-rdel="'+b.id+'">×</button></div>';
+      const repIco=b.repeat?' <span style="color:var(--acc)" title="wiederkehrend">↻</span>':'';
+      return '<div class="item'+(paid?' task-done':'')+'"><button class="chk'+(paid?' done':'')+'" data-btgl="'+b.id+'">✓</button><div class="item-main"><div class="item-title">'+esc(b.title)+repIco+'</div><div class="item-meta">'+meta+'</div></div><span class="item-amt">CHF '+fmt(+b.amount||0)+'</span><button class="ibtn del" data-rdel="'+b.id+'">×</button></div>';
     }).join("");
     return '<div class="mgroup"><div class="mgroup-head"><span>'+esc(g.label)+'</span><span>CHF '+fmt0(sum)+'</span></div>'+rows+'</div>';
   }).join("");
   box.querySelectorAll("[data-btgl]").forEach(btn=>btn.onclick=()=>{
     const b=bills.find(x=>x.id===btn.dataset.btgl);if(!b)return;
     if(b.status==="paid"){b.status="open";delete b.paidDate;}
-    else{b.status="paid";b.paidDate=ymd(new Date());}
+    else{
+      b.status="paid";b.paidDate=ymd(new Date());
+      // Wiederkehrende Rechnung: nächste automatisch anlegen
+      if(b.repeat){
+        const exists=bills.some(x=>x.title===b.title&&x.repeat===b.repeat&&x.status!=="paid");
+        if(!exists){
+          bills.push({id:uid(),title:b.title,amount:b.amount,date:nextDueDate(b.date,b.repeat),status:"open",repeat:b.repeat});
+          toast("Nächste "+b.title+" angelegt");
+        }
+        delete b.repeat; // bezahlte behält keine Wiederholung mehr
+      }
+    }
     saveKey("expenses:list",bills);renderFinanzen();renderHome();
   });
   box.querySelectorAll("[data-rdel]").forEach(btn=>btn.onclick=()=>{
@@ -1020,11 +1056,20 @@ $("rAdd").onclick=()=>{
   const title=$("rTitle").value.trim(),amt=parseFloat($("rAmt").value)||0;
   if(!title){toast("Bitte einen Namen eingeben");return;}
   if(!amt){toast("Bitte einen Betrag eingeben");return;}
-  bills.push({id:uid(),title,amount:amt,date:$("rDate").value||ymd(new Date()),status:"open"});
+  const repeat=$("rRepeat").value;
+  bills.push({id:uid(),title,amount:amt,date:$("rDate").value||ymd(new Date()),status:"open",repeat:repeat==="none"?undefined:repeat});
   saveKey("expenses:list",bills);
-  $("rTitle").value="";$("rAmt").value="";
-  toast("Rechnung hinzugefügt");renderFinanzen();renderHome();
+  $("rTitle").value="";$("rAmt").value="";$("rRepeat").value="none";
+  toast(repeat==="none"?"Rechnung hinzugefügt":"Wiederkehrende Rechnung angelegt");
+  renderFinanzen();renderHome();
 };
+function nextDueDate(dateStr,repeat){
+  const d=parseYmd(dateStr);
+  if(repeat==="monthly")d.setMonth(d.getMonth()+1);
+  else if(repeat==="quarterly")d.setMonth(d.getMonth()+3);
+  else if(repeat==="yearly")d.setFullYear(d.getFullYear()+1);
+  return ymd(d);
+}
 document.querySelectorAll("#rChips .chip").forEach(c=>c.onclick=()=>{
   document.querySelectorAll("#rChips .chip").forEach(x=>x.classList.remove("on"));
   c.classList.add("on");billFilter=c.dataset.rf;renderBills();
