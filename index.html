@@ -557,7 +557,7 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 <div class="isheet" id="sheet-shift">
   <div class="isheet-box">
     <div class="sheet-grab"></div>
-    <div class="isheet-title">Arbeitszeit erfassen</div>
+    <div class="isheet-title" id="sheetShiftTitle">Arbeitszeit erfassen</div>
     <label for="sDate">Datum</label>
     <input type="date" id="sDate">
     <div class="frow">
@@ -727,6 +727,7 @@ let billFilter="open";
 let viewYM={y:new Date().getFullYear(),m:new Date().getMonth()};
 let taskFilter="open";
 let showPastShifts=false;
+let editShiftId=null;
 let dirty=false,pushTimer=null,editExpId=null;
 
 function getToken(){return window.authStore.get("lg_auth_token");}
@@ -799,6 +800,8 @@ function openSheet(id){
 function cydFillShareField(){
   const box=$("sShareBox"),sel=$("sShareWith"),title=$("sShareTitle");
   if(!box||!sel)return;
+  // Beim Bearbeiten kein Teilen-Feld (nur beim Neuerfassen)
+  if(editShiftId){box.style.display="none";return;}
   if(!cydConnected()||!cydSpaces.length){box.style.display="none";return;}
   box.style.display="";
   sel.innerHTML='<option value="">Mit niemandem</option>'+cydSpaces.map(sp=>'<option value="'+sp+'">'+esc(cydSpaceName(sp))+'</option>').join("");
@@ -810,10 +813,10 @@ function closeSheet(id){const s=$(id);if(s)s.classList.remove("show");}
 function closeAllSheets(){document.querySelectorAll(".isheet.show").forEach(s=>s.classList.remove("show"));}
 document.querySelectorAll("[data-sheet]").forEach(b=>b.addEventListener("click",()=>openSheet(b.dataset.sheet)));
 document.querySelectorAll(".isheet").forEach(sh=>{
-  sh.addEventListener("click",e=>{if(e.target===sh)sh.classList.remove("show");});
+  sh.addEventListener("click",e=>{if(e.target===sh){sh.classList.remove("show");if(sh.id==="sheet-shift"&&typeof resetShiftForm==="function")resetShiftForm();}});
 });
 document.querySelectorAll(".isheet-close").forEach(b=>b.addEventListener("click",()=>{
-  const sh=b.closest(".isheet");if(sh)sh.classList.remove("show");
+  const sh=b.closest(".isheet");if(sh){sh.classList.remove("show");if(sh.id==="sheet-shift"&&typeof resetShiftForm==="function")resetShiftForm();}
 }));
 /* Finanzen-FAB: fragt welche Art von Eintrag */
 $("finFab").onclick=()=>openSheet("sheet-finpick");
@@ -957,7 +960,7 @@ function renderArbeit(){
     const pd=d.getDate()<=15
       ? "→ 25. "+MONTHS[d.getMonth()].slice(0,3)+"."
       : "→ 10. "+MONTHS[nextYM(d.getFullYear(),d.getMonth()).m].slice(0,3)+".";
-    return '<div class="item'+(faded?' faded':'')+'"><div class="item-main"><div class="item-title">'+ddmm(d)+d.getFullYear()+' · '+esc(s.start)+'–'+esc(s.end)+(s.pause?' <span style="color:var(--mut)">('+s.pause+" Min. Pause)</span>":"")+'</div><div class="item-meta">'+fmtH(mins)+' · CHF '+fmt0(mins/60*wage)+' <span style="color:var(--purple)">'+pd+'</span></div></div><button class="ibtn del" data-sdel="'+s.id+'">×</button></div>';
+    return '<div class="item'+(faded?' faded':'')+'"><div class="item-main"><div class="item-title">'+ddmm(d)+d.getFullYear()+' · '+esc(s.start)+'–'+esc(s.end)+(s.pause?' <span style="color:var(--mut)">('+s.pause+" Min. Pause)</span>":"")+'</div><div class="item-meta">'+fmtH(mins)+' · CHF '+fmt0(mins/60*wage)+' <span style="color:var(--purple)">'+pd+'</span></div></div><button class="ibtn edit" data-sedit="'+s.id+'">✎</button><button class="ibtn del" data-sdel="'+s.id+'">×</button></div>';
   }
   let html="";
   if(upcoming.length)html+=upcoming.map(s=>shiftRow(s,false)).join("");
@@ -973,12 +976,34 @@ function renderArbeit(){
     shiftsAll=shiftsAll.filter(x=>x.id!==b.dataset.sdel);
     saveKey("appt:list",shiftsAll);renderArbeit();renderHome();renderFinanzen();
   });
+  $("shiftList").querySelectorAll("[data-sedit]").forEach(b=>b.onclick=()=>{
+    const s=shiftsAll.find(x=>x.id===b.dataset.sedit);if(!s)return;
+    editShiftId=s.id;
+    $("sDate").value=s.date;
+    $("sStart").value=s.start;
+    $("sEnd").value=s.end;
+    $("sPause").value=s.pause||"";
+    $("sWage").value=wage||"";
+    $("sheetShiftTitle").textContent="Schicht bearbeiten";
+    $("sAdd").textContent="Änderung speichern";
+    openSheet("sheet-shift");
+  });
 }
 $("sAdd").onclick=async ()=>{
   const date=$("sDate").value,start=$("sStart").value,end=$("sEnd").value;
   if(!date||!start||!end){toast("Datum, Von und Bis ausfüllen");return;}
   const w=parseFloat($("sWage").value);
   if(w>0&&w!==wage){wage=w;mem["settings:wage"]=wage;}
+  if(editShiftId){
+    const s=shiftsAll.find(x=>x.id===editShiftId);
+    if(s){s.date=date;s.start=start;s.end=end;s.pause=+($("sPause").value||0);}
+    saveKey("appt:list",shiftsAll);
+    const d=parseYmd(date);viewYM={y:d.getFullYear(),m:d.getMonth()};
+    resetShiftForm();closeSheet("sheet-shift");
+    toast("Schicht aktualisiert");
+    renderArbeit();renderHome();renderFinanzen();
+    return;
+  }
   shiftsAll.push({id:uid(),title:"Arbeit",date,start,end,pause:+($("sPause").value||0),allDay:false,cat:"arbeit"});
   saveKey("appt:list",shiftsAll);
   const d=parseYmd(date);viewYM={y:d.getFullYear(),m:d.getMonth()};
@@ -997,9 +1022,16 @@ $("sAdd").onclick=async ()=>{
   }else{
     toast("Schicht erfasst");
   }
-  closeSheet("sheet-shift");
-  renderArbeit();renderHome();
+  resetShiftForm();closeSheet("sheet-shift");
+  renderArbeit();renderHome();renderFinanzen();
 };
+function resetShiftForm(){
+  editShiftId=null;
+  $("sDate").value=ymd(new Date());
+  $("sStart").value="";$("sEnd").value="";$("sPause").value="";
+  $("sheetShiftTitle").textContent="Arbeitszeit erfassen";
+  $("sAdd").textContent="Schicht erfassen";
+}
 $("mPrev").onclick=()=>{viewYM.m--;if(viewYM.m<0){viewYM.m=11;viewYM.y--;}renderArbeit();};
 $("mNext").onclick=()=>{viewYM.m++;if(viewYM.m>11){viewYM.m=0;viewYM.y++;}renderArbeit();};
 
