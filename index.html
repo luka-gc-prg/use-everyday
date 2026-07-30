@@ -338,6 +338,17 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 .cal-legend i{width:6px;height:6px;border-radius:50%;display:block}
 #calDay:not(:empty){margin-top:12px;padding-top:12px;border-top:.5px solid var(--line)}
 .cal-day-title{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--mut);text-transform:uppercase;margin-bottom:8px}
+.fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);z-index:80;width:54px;height:54px;border-radius:50%;border:none;background:var(--acc);color:#10151a;cursor:pointer;display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.4);transition:transform .12s}
+.fab:active{transform:scale(.92)}
+.fab svg{width:26px;height:26px}
+.isheet{position:fixed;inset:0;z-index:920;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center}
+.isheet.show{display:flex}
+.isheet-box{width:100%;max-width:560px;background:var(--card);border-radius:20px 20px 0 0;padding:18px 20px calc(env(safe-area-inset-bottom,0px) + 20px);animation:sheetUp .28s cubic-bezier(.22,1,.36,1)}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.isheet-title{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:.03em;color:var(--acc);margin-bottom:6px}
+.isheet .btn.ghost{margin-top:8px}
+.isheet .btn.pick{margin-top:10px;background:var(--card2);color:var(--text);border:.5px solid var(--line)}
+.isheet .btn.pick:first-of-type{margin-top:6px}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:100;background:rgba(22,24,29,.92);backdrop-filter:blur(14px);border-top:.5px solid var(--line);display:flex;justify-content:space-around;padding:8px 6px calc(env(safe-area-inset-bottom,0px) + 8px)}
 .tab{flex:1;max-width:96px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-family:"DM Sans",sans-serif;color:var(--mut2);border-radius:12px;transition:.15s}
 .tab .t-ico{display:grid;place-items:center;line-height:1}
@@ -427,21 +438,13 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
 
   <!-- ===== AUFGABEN ===== -->
   <section class="view" id="v-aufgaben">
-    <div class="card">
-      <label for="tTitle">Neue Aufgabe</label>
-      <input type="text" id="tTitle" placeholder="Was ist zu tun?">
-      <div class="frow">
-        <div><label for="tDue">Fällig am</label><input type="date" id="tDue"></div>
-        <div><label for="tSubj">Fach (optional)</label><input type="text" id="tSubj" placeholder="z.B. Mathe"></div>
-      </div>
-      <button class="btn" id="tAdd">+ Aufgabe hinzufügen</button>
-    </div>
     <div class="chips" id="tChips">
       <button class="chip on" data-f="open">Offen</button>
       <button class="chip" data-f="done">Erledigt</button>
       <button class="chip" data-f="all">Alle</button>
     </div>
     <div class="card" id="taskList"></div>
+    <button class="fab" data-sheet="sheet-task" aria-label="Neue Aufgabe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </section>
 
   <!-- ===== ARBEIT ===== -->
@@ -465,26 +468,13 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
       </div>
     </div>
 
-    <div class="card">
-      <label for="sDate">Arbeitszeit erfassen</label>
-      <input type="date" id="sDate">
-      <div class="frow">
-        <div><label for="sStart">Von</label><input type="time" id="sStart"></div>
-        <div><label for="sEnd">Bis</label><input type="time" id="sEnd"></div>
-      </div>
-      <div class="frow">
-        <div><label for="sPause">Pause (Min.)</label><input type="number" id="sPause" min="0" step="5" placeholder="0"></div>
-        <div><label for="sWage">Stundenlohn (CHF)</label><input type="number" id="sWage" min="0" step="0.05" placeholder="0.00"></div>
-      </div>
-      <button class="btn" id="sAdd">+ Schicht erfassen</button>
-    </div>
-
     <div class="month-nav">
       <button id="mPrev">‹</button>
       <span class="mn-label" id="mLabel">—</span>
       <button id="mNext">›</button>
     </div>
     <div class="card" id="shiftList"></div>
+    <button class="fab" data-sheet="sheet-shift" aria-label="Schicht erfassen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </section>
 
   <!-- ===== FINANZEN ===== -->
@@ -511,37 +501,10 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
     </div>
 
     <div class="sec-title">Monats-Aufteilung</div>
-    <div class="card">
-      <div class="frow">
-        <div><label for="bName">Wofür</label><input type="text" id="bName" placeholder="z.B. Lebensmittel"></div>
-        <div><label for="bAmt">Betrag (CHF)</label><input type="number" id="bAmt" inputmode="decimal" min="0" step="10" placeholder="0"></div>
-      </div>
-      <label style="display:flex;align-items:center;gap:9px;margin-top:12px;text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--text2)">
-        <input type="checkbox" id="bSave" style="width:auto;margin:0">
-        Das ist Sparen (kommt auf die Seite)
-      </label>
-      <button class="btn" id="bAdd">Aufteilung hinzufügen</button>
-      <div id="budgetBars" style="margin-top:6px"></div>
-    </div>
+    <div class="card" id="budgetBarsCard"><div id="budgetBars"></div></div>
     <div class="card" id="budgetList"></div>
 
     <div class="sec-title">Rechnungen</div>
-    <div class="card">
-      <label for="rTitle">Neue Rechnung</label>
-      <input type="text" id="rTitle" placeholder="z.B. Krankenkasse">
-      <div class="frow">
-        <div><label for="rAmt">Betrag (CHF)</label><input type="number" id="rAmt" inputmode="decimal" min="0" step="0.05" placeholder="0.00"></div>
-        <div><label for="rDate">Fällig am</label><input type="date" id="rDate"></div>
-      </div>
-      <label for="rRepeat">Wiederholung</label>
-      <select id="rRepeat">
-        <option value="none">Einmalig</option>
-        <option value="monthly">Jeden Monat</option>
-        <option value="quarterly">Alle 3 Monate</option>
-        <option value="yearly">Jedes Jahr</option>
-      </select>
-      <button class="btn" id="rAdd">Rechnung hinzufügen</button>
-    </div>
     <div class="chips" id="rChips">
       <button class="chip on" data-rf="open">Offen</button>
       <button class="chip" data-rf="paid">Bezahlt</button>
@@ -550,32 +513,131 @@ label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase
     <div class="card" id="billList"></div>
 
     <div class="sec-title">Zusatzeinkommen</div>
-    <div class="card">
-      <div class="frow">
-        <div><label for="xTitle">Wofür</label><input type="text" id="xTitle" placeholder="z.B. Nachhilfe"></div>
-        <div><label for="xAmt">Betrag (CHF)</label><input type="number" id="xAmt" inputmode="decimal" min="0" step="0.05" placeholder="0.00"></div>
-      </div>
-      <label for="xDate">Datum</label>
-      <input type="date" id="xDate">
-      <button class="btn" id="xAdd">Einkommen hinzufügen</button>
-    </div>
     <div class="card" id="extraList"></div>
+
+    <button class="fab" id="finFab" aria-label="Hinzufügen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </section>
 
   <!-- ===== NOTIZEN ===== -->
   <section class="view" id="v-notizen">
-    <div class="card">
-      <label for="nTitle">Neue Notiz</label>
-      <input type="text" id="nTitle" placeholder="Titel">
-      <label for="nSubj">Fach (optional)</label>
-      <input type="text" id="nSubj" placeholder="z.B. Deutsch">
-      <label for="nText">Inhalt</label>
-      <textarea id="nText" rows="4" placeholder="Notiz schreiben …"></textarea>
-      <button class="btn" id="nAdd">Notiz speichern</button>
-      <button class="btn ghost" id="nCancel" style="display:none;margin-top:8px">Abbrechen</button>
-    </div>
     <div id="noteList"></div>
+    <button class="fab" data-sheet="sheet-note" aria-label="Neue Notiz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </section>
+</div>
+
+<div class="isheet" id="sheet-finpick">
+  <div class="isheet-box">
+    <div class="sheet-grab"></div>
+    <div class="isheet-title">Was möchtest du hinzufügen?</div>
+    <button class="btn pick" data-pick="sheet-bill">Rechnung</button>
+    <button class="btn pick" data-pick="sheet-extra">Zusatzeinkommen</button>
+    <button class="btn pick" data-pick="sheet-budget">Monats-Aufteilung</button>
+    <button class="btn ghost isheet-close">Abbrechen</button>
+  </div>
+</div>
+
+<!-- Eingabe-Blätter -->
+<div class="isheet" id="sheet-task">
+  <div class="isheet-box">
+    <div class="sheet-grab"></div>
+    <div class="isheet-title">Neue Aufgabe</div>
+    <label for="tTitle">Was ist zu tun?</label>
+    <input type="text" id="tTitle" placeholder="Aufgabe">
+    <div class="frow">
+      <div><label for="tDue">Fällig am</label><input type="date" id="tDue"></div>
+      <div><label for="tSubj">Fach (optional)</label><input type="text" id="tSubj" placeholder="z.B. Mathe"></div>
+    </div>
+    <button class="btn" id="tAdd">Aufgabe hinzufügen</button>
+    <button class="btn ghost isheet-close">Abbrechen</button>
+  </div>
+</div>
+
+<div class="isheet" id="sheet-shift">
+  <div class="isheet-box">
+    <div class="sheet-grab"></div>
+    <div class="isheet-title">Arbeitszeit erfassen</div>
+    <label for="sDate">Datum</label>
+    <input type="date" id="sDate">
+    <div class="frow">
+      <div><label for="sStart">Von</label><input type="time" id="sStart"></div>
+      <div><label for="sEnd">Bis</label><input type="time" id="sEnd"></div>
+    </div>
+    <div class="frow">
+      <div><label for="sPause">Pause (Min.)</label><input type="number" id="sPause" min="0" step="5" placeholder="0"></div>
+      <div><label for="sWage">Stundenlohn (CHF)</label><input type="number" id="sWage" min="0" step="0.05" placeholder="0.00"></div>
+    </div>
+    <button class="btn" id="sAdd">Schicht erfassen</button>
+    <button class="btn ghost isheet-close">Abbrechen</button>
+  </div>
+</div>
+
+<div class="isheet" id="sheet-budget">
+  <div class="isheet-box">
+    <div class="sheet-grab"></div>
+    <div class="isheet-title">Monats-Aufteilung</div>
+    <div class="frow">
+      <div><label for="bName">Wofür</label><input type="text" id="bName" placeholder="z.B. Lebensmittel"></div>
+      <div><label for="bAmt">Betrag (CHF)</label><input type="number" id="bAmt" inputmode="decimal" min="0" step="10" placeholder="0"></div>
+    </div>
+    <label style="display:flex;align-items:center;gap:9px;margin-top:12px;text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--text2)">
+      <input type="checkbox" id="bSave" style="width:auto;margin:0">
+      Das ist Sparen (kommt auf die Seite)
+    </label>
+    <button class="btn" id="bAdd">Aufteilung hinzufügen</button>
+    <button class="btn ghost isheet-close">Abbrechen</button>
+  </div>
+</div>
+
+<div class="isheet" id="sheet-bill">
+  <div class="isheet-box">
+    <div class="sheet-grab"></div>
+    <div class="isheet-title">Neue Rechnung</div>
+    <label for="rTitle">Bezeichnung</label>
+    <input type="text" id="rTitle" placeholder="z.B. Krankenkasse">
+    <div class="frow">
+      <div><label for="rAmt">Betrag (CHF)</label><input type="number" id="rAmt" inputmode="decimal" min="0" step="0.05" placeholder="0.00"></div>
+      <div><label for="rDate">Fällig am</label><input type="date" id="rDate"></div>
+    </div>
+    <label for="rRepeat">Wiederholung</label>
+    <select id="rRepeat">
+      <option value="none">Einmalig</option>
+      <option value="monthly">Jeden Monat</option>
+      <option value="quarterly">Alle 3 Monate</option>
+      <option value="yearly">Jedes Jahr</option>
+    </select>
+    <button class="btn" id="rAdd">Rechnung hinzufügen</button>
+    <button class="btn ghost isheet-close">Abbrechen</button>
+  </div>
+</div>
+
+<div class="isheet" id="sheet-extra">
+  <div class="isheet-box">
+    <div class="sheet-grab"></div>
+    <div class="isheet-title">Zusatzeinkommen</div>
+    <div class="frow">
+      <div><label for="xTitle">Wofür</label><input type="text" id="xTitle" placeholder="z.B. Nachhilfe"></div>
+      <div><label for="xAmt">Betrag (CHF)</label><input type="number" id="xAmt" inputmode="decimal" min="0" step="0.05" placeholder="0.00"></div>
+    </div>
+    <label for="xDate">Datum</label>
+    <input type="date" id="xDate">
+    <button class="btn" id="xAdd">Einkommen hinzufügen</button>
+    <button class="btn ghost isheet-close">Abbrechen</button>
+  </div>
+</div>
+
+<div class="isheet" id="sheet-note">
+  <div class="isheet-box">
+    <div class="sheet-grab"></div>
+    <div class="isheet-title" id="noteSheetTitle">Neue Notiz</div>
+    <label for="nTitle">Titel</label>
+    <input type="text" id="nTitle" placeholder="Titel">
+    <label for="nSubj">Fach (optional)</label>
+    <input type="text" id="nSubj" placeholder="z.B. Deutsch">
+    <label for="nText">Inhalt</label>
+    <textarea id="nText" rows="4" placeholder="Notiz schreiben …"></textarea>
+    <button class="btn" id="nAdd">Notiz speichern</button>
+    <button class="btn ghost isheet-close" id="nCancel">Abbrechen</button>
+  </div>
 </div>
 
 <!-- Untere Navigation -->
@@ -692,6 +754,32 @@ function go(tab){
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>go(b.dataset.tab)));
 document.addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(g)go(g.dataset.go);});
 
+/* ===== Eingabe-Blätter (Bottom-Sheets) ===== */
+function openSheet(id){
+  const s=$(id);if(!s)return;
+  // Datumsfelder auf heute, falls leer
+  const today=ymd(new Date());
+  s.querySelectorAll('input[type="date"]').forEach(inp=>{if(!inp.value)inp.value=today;});
+  s.classList.add("show");
+  const inp=s.querySelector("input,textarea,select");
+  if(inp)setTimeout(()=>{try{inp.focus();}catch(e){}},100);
+}
+function closeSheet(id){const s=$(id);if(s)s.classList.remove("show");}
+function closeAllSheets(){document.querySelectorAll(".isheet.show").forEach(s=>s.classList.remove("show"));}
+document.querySelectorAll("[data-sheet]").forEach(b=>b.addEventListener("click",()=>openSheet(b.dataset.sheet)));
+document.querySelectorAll(".isheet").forEach(sh=>{
+  sh.addEventListener("click",e=>{if(e.target===sh)sh.classList.remove("show");});
+});
+document.querySelectorAll(".isheet-close").forEach(b=>b.addEventListener("click",()=>{
+  const sh=b.closest(".isheet");if(sh)sh.classList.remove("show");
+}));
+/* Finanzen-FAB: fragt welche Art von Eintrag */
+$("finFab").onclick=()=>openSheet("sheet-finpick");
+document.querySelectorAll("[data-pick]").forEach(b=>b.addEventListener("click",()=>{
+  closeSheet("sheet-finpick");
+  setTimeout(()=>openSheet(b.dataset.pick),180);
+}));
+
 /* ================= BERECHNUNGEN ================= */
 function shifts(){return shiftsAll.filter(a=>a&&a.cat==="arbeit"&&a.date&&a.start&&a.end);}
 function shiftMinutes(s){let m=hm(s.end)-hm(s.start);if(m<0)m+=24*60;m-=(+s.pause||0);return Math.max(0,m);}
@@ -785,7 +873,8 @@ $("tAdd").onclick=()=>{
   todos.push({id:uid(),title,due:$("tDue").value||"",subject:$("tSubj").value.trim(),done:false});
   saveKey("todos:list",todos);
   $("tTitle").value="";$("tSubj").value="";
-  toast("✓ Aufgabe hinzugefügt");renderTasks();renderHome();
+  closeSheet("sheet-task");
+  toast("Aufgabe hinzugefügt");renderTasks();renderHome();
 };
 $("tTitle").addEventListener("keydown",e=>{if(e.key==="Enter")$("tAdd").click();});
 document.querySelectorAll("#tChips .chip").forEach(c=>c.onclick=()=>{
@@ -849,7 +938,8 @@ $("sAdd").onclick=()=>{
   shiftsAll.push({id:uid(),title:"Arbeit",date,start,end,pause:+($("sPause").value||0),allDay:false,cat:"arbeit"});
   saveKey("appt:list",shiftsAll);
   const d=parseYmd(date);viewYM={y:d.getFullYear(),m:d.getMonth()};
-  toast("✓ Schicht erfasst");renderArbeit();renderHome();
+  closeSheet("sheet-shift");
+  toast("Schicht erfasst");renderArbeit();renderHome();
 };
 $("mPrev").onclick=()=>{viewYM.m--;if(viewYM.m<0){viewYM.m=11;viewYM.y--;}renderArbeit();};
 $("mNext").onclick=()=>{viewYM.m++;if(viewYM.m>11){viewYM.m=0;viewYM.y++;}renderArbeit();};
@@ -967,12 +1057,14 @@ $("fNext").onclick=()=>{finYM.m++;if(finYM.m>11){finYM.m=0;finYM.y++;}renderFina
 /* --- Monats-Aufteilung --- */
 function renderBudgets(income){
   const total=budgets.reduce((s,b)=>s+(+b.amount||0),0);
-  const bars=$("budgetBars"),list=$("budgetList");
+  const bars=$("budgetBars"),list=$("budgetList"),barsCard=$("budgetBarsCard");
   if(!budgets.length){
     bars.innerHTML="";
-    list.innerHTML='<div class="empty">Noch nichts eingeplant. Teile dein Einkommen oben auf.</div>';
+    if(barsCard)barsCard.style.display="none";
+    list.innerHTML='<div class="empty">Noch nichts eingeplant. Tippe unten auf +, um dein Einkommen aufzuteilen.</div>';
     return;
   }
+  if(barsCard)barsCard.style.display="";
   const max=Math.max.apply(null,budgets.map(b=>+b.amount||0));
   bars.innerHTML=budgets.map((b,i)=>{
     const amt=+b.amount||0,pct=max?Math.round(amt/max*100):0;
@@ -992,6 +1084,7 @@ $("bAdd").onclick=()=>{
   budgets.push({id:uid(),name,amount:amt,save:$("bSave").checked});
   saveKey("budget:list",budgets);
   $("bName").value="";$("bAmt").value="";$("bSave").checked=false;
+  closeSheet("sheet-budget");
   toast("Aufteilung gespeichert");renderFinanzen();renderHome();
 };
 
@@ -1060,6 +1153,7 @@ $("rAdd").onclick=()=>{
   bills.push({id:uid(),title,amount:amt,date:$("rDate").value||ymd(new Date()),status:"open",repeat:repeat==="none"?undefined:repeat});
   saveKey("expenses:list",bills);
   $("rTitle").value="";$("rAmt").value="";$("rRepeat").value="none";
+  closeSheet("sheet-bill");
   toast(repeat==="none"?"Rechnung hinzugefügt":"Wiederkehrende Rechnung angelegt");
   renderFinanzen();renderHome();
 };
@@ -1099,6 +1193,7 @@ $("xAdd").onclick=()=>{
   extraInc.push({id:uid(),title:$("xTitle").value.trim()||"Zusatzeinkommen",amount:amt,date:$("xDate").value||ymd(new Date())});
   saveKey("extra:list",extraInc);
   $("xTitle").value="";$("xAmt").value="";
+  closeSheet("sheet-extra");
   toast("Einkommen hinzugefügt");renderFinanzen();renderHome();
 };
 
@@ -1120,9 +1215,9 @@ function renderNotes(){
     $("nSubj").value=n.subject||"";
     $("nText").value=n.text||"";
     $("nAdd").textContent="Änderung speichern";
-    $("nCancel").style.display="";
+    $("noteSheetTitle").textContent="Notiz bearbeiten";
     renderNotes();
-    $("nTitle").scrollIntoView({behavior:"smooth",block:"center"});
+    openSheet("sheet-note");
   });
   box.querySelectorAll("[data-ndel]").forEach(b=>b.onclick=()=>{
     if(!confirm("Notiz löschen?"))return;
@@ -1135,7 +1230,7 @@ function resetNoteForm(){
   editNoteId=null;
   $("nTitle").value="";$("nSubj").value="";$("nText").value="";
   $("nAdd").textContent="Notiz speichern";
-  $("nCancel").style.display="none";
+  $("noteSheetTitle").textContent="Neue Notiz";
 }
 $("nAdd").onclick=()=>{
   const title=$("nTitle").value.trim();
@@ -1150,9 +1245,10 @@ $("nAdd").onclick=()=>{
   }
   saveKey("notes:list",notes);
   resetNoteForm();
+  closeSheet("sheet-note");
   renderNotes();renderHome();
 };
-$("nCancel").onclick=()=>{resetNoteForm();renderNotes();};
+$("nCancel").onclick=()=>{resetNoteForm();closeSheet("sheet-note");renderNotes();};
 
 /* ================= EINSTELLUNGEN ================= */
 $("gearBtn").onclick=()=>{$("sheet").classList.add("show");};
